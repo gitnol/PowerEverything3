@@ -148,7 +148,7 @@ Diese Maßnahmen stellen sicher, dass das Modul sowohl in der normalen PowerShel
 
 ## Lizenz & Haftungsausschluss
 
-[MIT](https://github.com/gitnol/PowerEverything3/LICENSE)
+[MIT](https://github.com/gitnol/PowerEverything3/blob/main/LICENSE)
 
 Dieses Projekt wird ohne jegliche Gewährleistung zur Verfügung gestellt. Die Nutzung erfolgt auf eigene Verantwortung.
 
