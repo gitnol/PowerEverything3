@@ -2,6 +2,20 @@
 
 Ein leistungsstarker und benutzerfreundlicher PowerShell-Wrapper für die [Everything Search Engine](https://www.voidtools.com/) (Version 1.5+). Dieses Modul nutzt die `Everything3_x64.dll` aus dem Everything SDK, um eine extrem schnelle Dateisuche direkt aus der PowerShell-Konsole zu ermöglichen.
 
+Getestet wurde es mit:
+- Powershell 7.5.2
+
+- Everything 1.5.0.1396a-x64
+  - Webseite: https://www.voidtools.com/everything-1.5a/
+  - Download: https://www.voidtools.com/Everything-1.5.0.1396a.x64-Setup.exe 
+  - Größe: (1703 KB - SHA256: 37f8f9359346b78a5e9820b5bae73044366a299eaaeba2d8a56fadf46bcc577e)
+
+- SDK Version 3.0.0.4 
+  - Webseite: https://www.voidtools.com/forum/viewtopic.php?t=15853
+  - Download: https://www.voidtools.com/Everything-SDK-3.0.0.4.zip 
+  - Größe: (216 KB - SHA256: 48d76d7e90b2a3ea8f6db7626f27bd8f001e3163c826dae5de979430b226e62d) 
+  - Github: https://github.com/voidtools/everything_sdk3
+
 ## Inhaltsverzeichnis
 
   - [✨ Features](https://www.google.com/search?q=%23-features)
@@ -24,7 +38,7 @@ Ein leistungsstarker und benutzerfreundlicher PowerShell-Wrapper für die [Every
 
 ## 📋 Anforderungen
 
-  - **PowerShell 5.1** oder höher
+  - **PowerShell 5.1** oder höher. Empfohlen wird **PowerShell 7.5.2** oder höher.
   - **[Everything](https://www.voidtools.com/downloads/) v1.5a** oder neuer muss installiert sein und laufen.
   - Die **`Everything3_x64.dll`** (aus dem offiziellen [Everything SDK](https://www.voidtools.com/support/everything/sdk/)) muss sich entweder im selben Verzeichnis wie das Modul oder in einem Ordner befinden, der in der `PATH`-Umgebungsvariable aufgeführt ist.
 
@@ -132,3 +146,4 @@ Find-Files -Pattern "size:0" -MaxResults 20
 [MIT](https://github.com/gitnol/PowerEverything3/LICENSE)
 
 Ich hafte für nichts. Wenn ihr es nutzt, dann auf eigene Gefahr :)
+Ich habe nichts mit VoidTools zu tun. Alle Marken oder Namen gehören denen. Das ist ein reines Forschungsprojekt.
