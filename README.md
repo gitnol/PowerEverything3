@@ -1,155 +1,155 @@
 # Everything3 PowerShell Wrapper
 
-Ein leistungsstarker und benutzerfreundlicher PowerShell-Wrapper für die [Everything Search Engine](https://www.voidtools.com/) (Version 1.5+). Dieses Modul nutzt die `Everything3_x64.dll` aus dem Everything SDK, um eine extrem schnelle Dateisuche direkt aus der PowerShell-Konsole zu ermöglichen.
+A powerful and user-friendly PowerShell wrapper for the [Everything Search Engine](https://www.voidtools.com/) (Version 1.5+). This module utilizes the `Everything3_x64.dll` from the Everything SDK to enable extremely fast file searches directly from the PowerShell console.
 
-Getestet wurde es mit:
+Tested with:
 - PowerShell 7.5.2
 - Everything 1.5.0.1396a-x64
-  - Webseite: https://www.voidtools.com/everything-1.5a/
+  - Website: https://www.voidtools.com/everything-1.5a/
   - Download: https://www.voidtools.com/Everything-1.5.0.1396a.x64-Setup.exe 
-  - Größe: (1703 KB - SHA256: 37f8f9359346b78a5e9820b5bae73044366a299eaaeba2d8a56fadf46bcc577e)
+  - Size: (1703 KB - SHA256: 37f8f9359346b78a5e9820b5bae73044366a299eaaeba2d8a56fadf46bcc577e)
 - SDK Version 3.0.0.4 
-  - Webseite: https://www.voidtools.com/forum/viewtopic.php?t=15853
+  - Website: https://www.voidtools.com/forum/viewtopic.php?t=15853
   - Download: https://www.voidtools.com/Everything-SDK-3.0.0.4.zip 
-  - Größe: (216 KB - SHA256: 48d76d7e90b2a3ea8f6db7626f27bd8f001e3163c826dae5de979430b226e62d) 
+  - Size: (216 KB - SHA256: 48d76d7e90b2a3ea8f6db7626f27bd8f001e3163c826dae5de979430b226e62d) 
   - GitHub: https://github.com/voidtools/everything_sdk3
 
-## Inhaltsverzeichnis
+## Table of Contents
 
 - [Everything3 PowerShell Wrapper](#everything3-powershell-wrapper)
-  - [Inhaltsverzeichnis](#inhaltsverzeichnis)
+  - [Table of Contents](#table-of-contents)
   - [Features](#features)
-  - [Anforderungen](#anforderungen)
+  - [Requirements](#requirements)
   - [Quick Start](#quick-start)
-  - [Funktionen](#funktionen)
-  - [Anwendungsbeispiele](#anwendungsbeispiele)
-    - [Einfache Suchen mit `Find-Files`](#einfache-suchen-mit-find-files)
-    - [Erweiterte Suchen mit `Search-Everything`](#erweiterte-suchen-mit-search-everything)
-  - [VSCode-Besonderheiten](#vscode-besonderheiten)
-  - [Lizenz \& Haftungsausschluss](#lizenz--haftungsausschluss)
+  - [Functions](#functions)
+  - [Usage Examples](#usage-examples)
+    - [Simple Searches with `Find-Files`](#simple-searches-with-find-files)
+    - [Advanced Searches with `Search-Everything`](#advanced-searches-with-search-everything)
+  - [VSCode Considerations](#vscode-considerations)
+  - [License \& Disclaimer](#license--disclaimer)
 
 ---
 
 ## Features
 
-- **Schnelle Verbindung:** Einfaches Verbinden und Trennen von der Everything-Instanz
-- **Mächtige Suche:** Unterstützung für komplexe Abfragen, Regex, Groß-/Kleinschreibung und mehr
-- **Eigenschaftsabruf:** Abrufen von Metadaten wie Größe, Erstellungsdatum und Attribute
-- **Einfache Handhabung:** Praktische Wrapper-Funktion `Find-Files` für alltägliche Suchen
-- **Verbindungstest:** Eine eingebaute Funktion zum Testen der Verbindung und zum Anzeigen von Diagnoseinformationen
-- **VSCode-Kompatibilität:** Automatische Behandlung von VSCode-spezifischen DLL-Loading-Problemen
+- **Fast Connection:** Easy connection and disconnection from the Everything instance
+- **Powerful Search:** Support for complex queries, regex, case sensitivity, and more
+- **Property Retrieval:** Retrieve metadata such as size, creation date, and attributes
+- **Simple Handling:** Convenient wrapper function `Find-Files` for everyday searches
+- **Connection Testing:** Built-in function to test connection and display diagnostic information
+- **VSCode Compatibility:** Automatic handling of VSCode-specific DLL loading issues
 
 ---
 
-## Anforderungen
+## Requirements
 
-- **PowerShell 5.1** oder höher. Empfohlen wird **PowerShell 7.5.2** oder höher
-- **[Everything](https://www.voidtools.com/downloads/) v1.5a** oder neuer muss installiert sein und laufen
-- Die **`Everything3_x64.dll`** (aus dem offiziellen [Everything SDK](https://www.voidtools.com/support/everything/sdk/)) muss sich im selben Verzeichnis wie das Modul befinden
+- **PowerShell 5.1** or higher. **PowerShell 7.5.2** or higher is recommended
+- **[Everything](https://www.voidtools.com/downloads/) v1.5a** or newer must be installed and running
+- The **`Everything3_x64.dll`** (from the official [Everything SDK](https://www.voidtools.com/support/everything/sdk/)) must be located in the same directory as the module
 
 ---
 
 ## Quick Start
 
-1. **Klonen Sie das Repository:**
+1. **Clone the repository:**
    ```sh
    git clone https://github.com/gitnol/PowerEverything3.git
    ```
 
-2. **Importieren Sie das Modul** in Ihre PowerShell-Sitzung:
+2. **Import the module** into your PowerShell session:
    ```powershell
    Import-Module .\Everything3-PowerShell-Wrapper.psd1 -Verbose
    ```
 
-3. **Testen Sie die Verbindung:**
+3. **Test the connection:**
    ```powershell
    Test-EverythingConnection
    ```
 
-4. **Dateien finden:**
+4. **Find files:**
    ```powershell
    Find-Files -Pattern "*.pdf" -MaxResults 10
    ```
 
 ---
 
-## Funktionen
+## Functions
 
-| Funktion                    | Beschreibung                                                                 |
-|:---------------------------|:-----------------------------------------------------------------------------|
-| `Find-Files`               | Eine einfache Wrapper-Funktion für die schnelle Suche nach Dateien          |
-| `Search-Everything`        | Führt eine detaillierte Suche mit allen verfügbaren Optionen durch          |
-| `Connect-Everything`       | Stellt eine Verbindung zum Everything-Client her                            |
-| `Disconnect-Everything`    | Trennt die Verbindung zum Everything-Client                                 |
-| `Test-EverythingConnection`| Überprüft die Verbindung zur Everything-Instanz und zeigt Statusinformationen an |
+| Function                    | Description                                                                    |
+|:---------------------------|:-------------------------------------------------------------------------------|
+| `Find-Files`               | A simple wrapper function for quick file searches                             |
+| `Search-Everything`        | Performs detailed searches with all available options                         |
+| `Connect-Everything`       | Establishes a connection to the Everything client                             |
+| `Disconnect-Everything`    | Disconnects from the Everything client                                        |
+| `Test-EverythingConnection`| Verifies the connection to the Everything instance and displays status information |
 
 ---
 
-## Anwendungsbeispiele
+## Usage Examples
 
-### Einfache Suchen mit `Find-Files`
+### Simple Searches with `Find-Files`
 
-**Suche nach PDF- und DOCX-Dateien:**
+**Search for PDF and DOCX files:**
 ```powershell
 Find-Files -Pattern "*" -Extensions @("pdf", "docx") -MaxResults 10
 ```
 
-**Suche nach Dateien mit Eigenschaften (Größe, Datum):**
+**Search for files with properties (size, date):**
 ```powershell
 Find-Files -Pattern "invoice*" -IncludeProperties -MaxResults 5
 ```
 
-**Regex-Suche nach Bilddateien mit Datumsmuster:**
+**Regex search for image files with date pattern:**
 ```powershell
 Find-Files -Pattern "regex:^\d{4}-\d{2}-\d{2}.*\.(jpg|png)$" -Verbose -MaxResults 10
-# oder
+# or
 Find-Files -Pattern '^\d{4}-\d{2}-\d{2}.*\.(jpg|png)$' -Regex -Verbose -MaxResults 10
 ```
 
-### Erweiterte Suchen mit `Search-Everything`
+### Advanced Searches with `Search-Everything`
 
-**Finde die 5 größten Dateien über 100 MB und sortiere sie nach Größe:**
+**Find the 5 largest files over 100 MB and sort by size:**
 ```powershell
-# Verbindung manuell aufbauen
+# Manually establish connection
 $client = Connect-Everything
 
-# Suche ausführen und nach Größe absteigend sortieren
+# Execute search and sort by size in descending order
 Search-Everything -Client $client -Query "size:>100mb" -MaxResults 5 -Properties "Size" -SortBy @{Property = "Size"; Descending = $true}
 
-# Verbindung wieder trennen
+# Disconnect
 Disconnect-Everything -Client $client
 ```
 
-**Finde alle Dateien, die in den letzten 7 Tagen geändert wurden:**
+**Find all files modified in the last 7 days:**
 ```powershell
 $client = Connect-Everything
 Search-Everything -Client $client -Query "dm:last7days" -MaxResults 10 -Properties "DateModified"
 Disconnect-Everything -Client $client
 ```
 
-**Finde leere Dateien:**
+**Find empty files:**
 ```powershell
 Find-Files -Pattern "size:0" -MaxResults 20
 ```
 
 ---
 
-## VSCode-Besonderheiten
+## VSCode Considerations
 
-Das Modul enthält automatische Workarounds für VSCode-spezifische Probleme beim Laden nativer DLLs:
+The module includes automatic workarounds for VSCode-specific issues when loading native DLLs:
 
-- **Automatisches DLL-Loading:** Die `Everything3_x64.dll` wird über `Kernel32::LoadLibrary()` explizit geladen
-- **PATH-Behandlung:** Das Modul-Verzeichnis wird automatisch zum PATH hinzugefügt
-- **Fehlerbehandlung:** Robuste Behandlung von VSCode-spezifischen Parameter-Binding-Problemen
+- **Automatic DLL Loading:** The `Everything3_x64.dll` is explicitly loaded via `Kernel32::LoadLibrary()`
+- **PATH Handling:** The module directory is automatically added to the PATH
+- **Error Handling:** Robust handling of VSCode-specific parameter binding issues
 
-Diese Maßnahmen stellen sicher, dass das Modul sowohl in der normalen PowerShell-Konsole als auch in VSCode korrekt funktioniert.
+These measures ensure that the module functions correctly in both the regular PowerShell console and VSCode.
 
 ---
 
-## Lizenz & Haftungsausschluss
+## License & Disclaimer
 
 [MIT](https://github.com/gitnol/PowerEverything3/blob/main/LICENSE)
 
-Dieses Projekt wird ohne jegliche Gewährleistung zur Verfügung gestellt. Die Nutzung erfolgt auf eigene Verantwortung.
+This project is provided without any warranty. Use at your own risk.
 
-Dieses Projekt steht in keiner Verbindung zu VoidTools. Alle Markenzeichen gehören ihren jeweiligen Eigentümern. Dies ist ein reines Forschungs- und Entwicklungsprojekt.
+This project is not affiliated with VoidTools. All trademarks belong to their respective owners. This is a pure research and development project.
