@@ -1,5 +1,7 @@
 # Everything3 PowerShell Wrapper
 
+[German Translation / Deutsche Übersetzung](README-DE.md)
+
 A powerful and user-friendly PowerShell wrapper for the [Everything Search Engine](https://www.voidtools.com/) (Version 1.5+). This module utilizes the `Everything3_x64.dll` from the Everything SDK to enable extremely fast file searches directly from the PowerShell console.
 
 Tested with:
