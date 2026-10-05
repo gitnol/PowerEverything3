@@ -38,10 +38,10 @@ public static class Everything3SDK
     public static extern bool Everything3_SetSearchTextW(IntPtr searchState, string searchText);
 
     [DllImport("Everything3_x64.dll", CallingConvention = CallingConvention.StdCall)]
-    public static extern bool Everything3_SetSearchViewportOffset(IntPtr searchState, uint offset);
+    public static extern bool Everything3_SetSearchViewportOffset(IntPtr searchState, UIntPtr offset);
 
     [DllImport("Everything3_x64.dll", CallingConvention = CallingConvention.StdCall)]
-    public static extern bool Everything3_SetSearchViewportCount(IntPtr searchState, uint count);
+    public static extern bool Everything3_SetSearchViewportCount(IntPtr searchState, UIntPtr count);
 
     [DllImport("Everything3_x64.dll", CallingConvention = CallingConvention.StdCall)]
     public static extern bool Everything3_SetSearchMatchCase(IntPtr searchState, bool matchCase);
@@ -64,29 +64,29 @@ public static class Everything3SDK
 
     // Result retrieval
     [DllImport("Everything3_x64.dll", CallingConvention = CallingConvention.StdCall)]
-    public static extern uint Everything3_GetResultListViewportCount(IntPtr resultList);
+    public static extern UIntPtr Everything3_GetResultListViewportCount(IntPtr resultList);
 
     [DllImport("Everything3_x64.dll", CallingConvention = CallingConvention.StdCall)]
-    public static extern uint Everything3_GetResultListCount(IntPtr resultList);
+    public static extern UIntPtr Everything3_GetResultListCount(IntPtr resultList);
 
     [DllImport("Everything3_x64.dll", CharSet = CharSet.Unicode, CallingConvention = CallingConvention.StdCall)]
-    public static extern uint Everything3_GetResultFullPathNameW(IntPtr resultList, uint index, StringBuilder fileName, uint fileNameSize);
+    public static extern UIntPtr Everything3_GetResultFullPathNameW(IntPtr resultList, UIntPtr index, StringBuilder fileName, UIntPtr fileNameSize);
 
     [DllImport("Everything3_x64.dll", CharSet = CharSet.Unicode, CallingConvention = CallingConvention.StdCall)]
-    public static extern uint Everything3_GetResultNameW(IntPtr resultList, uint index, StringBuilder fileName, uint fileNameSize);
+    public static extern UIntPtr Everything3_GetResultNameW(IntPtr resultList, UIntPtr index, StringBuilder fileName, UIntPtr fileNameSize);
 
     // Property requests
     [DllImport("Everything3_x64.dll", CallingConvention = CallingConvention.StdCall)]
     public static extern bool Everything3_AddSearchPropertyRequest(IntPtr searchState, uint propertyId);
 
-    [DllImport("Everything3_x64.dll", CallingConvention = CallingConvention.StdCall)]
-    public static extern uint Everything3_GetResultPropertyTextW(IntPtr resultList, uint index, uint propertyId, StringBuilder buffer, uint bufferSize);
+    [DllImport("Everything3_x64.dll", CharSet = CharSet.Unicode, CallingConvention = CallingConvention.StdCall)]
+    public static extern UIntPtr Everything3_GetResultPropertyTextW(IntPtr resultList, UIntPtr index, uint propertyId, StringBuilder buffer, UIntPtr bufferSize);
 
     [DllImport("Everything3_x64.dll", CallingConvention = CallingConvention.StdCall)]
-    public static extern ulong Everything3_GetResultPropertyUINT64(IntPtr resultList, uint index, uint propertyId);
+    public static extern ulong Everything3_GetResultPropertyUINT64(IntPtr resultList, UIntPtr index, uint propertyId);
 
     [DllImport("Everything3_x64.dll", CallingConvention = CallingConvention.StdCall)]
-    public static extern uint Everything3_GetResultPropertyDWORD(IntPtr resultList, uint index, uint propertyId);
+    public static extern uint Everything3_GetResultPropertyDWORD(IntPtr resultList, UIntPtr index, uint propertyId);
 
     // Sort functions
     [DllImport("Everything3_x64.dll", CallingConvention = CallingConvention.StdCall)]
@@ -126,13 +126,10 @@ public static class Everything3Properties
 $typeExists = $null -ne ([System.Management.Automation.PSTypeName]'Everything3SDK').Type
 Write-Verbose "Everything3SDK Type bereits geladen: $typeExists"
 
-$typeExists = $null -ne ([System.Management.Automation.PSTypeName]'Everything3SDK').Type
-Write-Verbose "Everything3SDK Type bereits geladen: $typeExists"
-
 if (-not $typeExists) {
     try {
 
-        Write-Host "Lade native DLL explizit: $DllPath" -ForegroundColor Yellow
+        Write-Verbose "Lade native DLL explizit: $DllPath"
         
         # Kernel32 LoadLibrary P/Invoke definieren
         $Kernel32Type = @"

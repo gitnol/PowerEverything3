@@ -13,8 +13,8 @@ class Everything3Client {
         $this.IsConnected = $this.Handle -ne [IntPtr]::Zero
         
         if (-not $this.IsConnected) {
-            $error = [Everything3SDK]::Everything3_GetLastError()
-            throw "Fehler beim Verbinden mit Everything-Instanz '$instanceName'. Fehler: $error"
+            $lastError = [Everything3SDK]::Everything3_GetLastError()
+            throw "Fehler beim Verbinden mit Everything-Instanz '$instanceName'. Fehler: $lastError"
         }
     }
 
@@ -32,13 +32,19 @@ class Everything3Result {
     [string]$Name
     [string]$Directory
     [hashtable]$Properties = @{}
-    [bool]$Exists
+    [Nullable[bool]]$Exists   # nur mit -CheckExists gefüllt, sonst $null (Test-Path je Treffer ist teuer)
 
     Everything3Result([string]$fullPath) {
         $this.FullPath = $fullPath
         $this.Name = [System.IO.Path]::GetFileName($fullPath)
         $this.Directory = [System.IO.Path]::GetDirectoryName($fullPath)
-        $this.Exists = Test-Path -LiteralPath $fullPath -ErrorAction SilentlyContinue
+    }
+
+    Everything3Result([string]$fullPath, [bool]$checkExists) {
+        $this.FullPath = $fullPath
+        $this.Name = [System.IO.Path]::GetFileName($fullPath)
+        $this.Directory = [System.IO.Path]::GetDirectoryName($fullPath)
+        if ($checkExists) { $this.Exists = Test-Path -LiteralPath $fullPath -ErrorAction SilentlyContinue }
     }
 }
 
@@ -126,8 +132,11 @@ function Search-Everything {
         [Parameter(Mandatory)]
         [string]$Query,
         
-        [int]$MaxResults = 1000,
+        [ValidateRange(0, [int]::MaxValue)]
+        [int]$MaxResults = 1000,              # 0 = alle Treffer
+        [ValidateRange(0, [int]::MaxValue)]
         [int]$Offset = 0,
+        [switch]$CheckExists,                 # Exists je Treffer per Test-Path prüfen (langsam)
         [switch]$MatchCase,
         [switch]$MatchWholeWord,
         [switch]$MatchPath,
@@ -149,8 +158,9 @@ function Search-Everything {
     try {
         # Suchoptionen konfigurieren
         [void][Everything3SDK]::Everything3_SetSearchTextW($searchState, $Query)
-        [void][Everything3SDK]::Everything3_SetSearchViewportOffset($searchState, [uint32]$Offset)
-        [void][Everything3SDK]::Everything3_SetSearchViewportCount($searchState, [uint32]$MaxResults)
+        $viewportCount = if ($MaxResults -eq 0) { [uint64]::MaxValue } else { [uint64]$MaxResults }
+        [void][Everything3SDK]::Everything3_SetSearchViewportOffset($searchState, [UIntPtr]::new([uint64]$Offset))
+        [void][Everything3SDK]::Everything3_SetSearchViewportCount($searchState, [UIntPtr]::new($viewportCount))
         [void][Everything3SDK]::Everything3_SetSearchMatchCase($searchState, $MatchCase.IsPresent)
         [void][Everything3SDK]::Everything3_SetSearchMatchWholeWords($searchState, $MatchWholeWord.IsPresent)
         [void][Everything3SDK]::Everything3_SetSearchMatchPath($searchState, $MatchPath.IsPresent)
@@ -161,7 +171,7 @@ function Search-Everything {
         $propertyIds = @()
         foreach ($prop in $Properties) {
             $propId = Get-PropertyId -PropertyName $prop
-            if ($propId) {
+            if ($null -ne $propId) {
                 [void][Everything3SDK]::Everything3_AddSearchPropertyRequest($searchState, $propId)
                 $propertyIds += @{Name = $prop; Id = $propId }
             }
@@ -174,7 +184,7 @@ function Search-Everything {
         # Wir müssen ihn daher ebenfalls explizit anfordern, damit Everything3_GetResultFullPathNameW ihn finden kann.
         if ($Properties.Count -gt 0) {
             $fullPathId = Get-PropertyId -PropertyName 'FullPath'
-            if ($fullPathId) {
+            if ($null -ne $fullPathId) {
                 [void][Everything3SDK]::Everything3_AddSearchPropertyRequest($searchState, $fullPathId)
             }
         }
@@ -182,7 +192,7 @@ function Search-Everything {
         # Sortierung hinzufügen
         if ($SortBy.Count -gt 0) {
             $sortPropId = Get-PropertyId -PropertyName $SortBy.Property
-            if ($sortPropId) {
+            if ($null -ne $sortPropId) {
                 $ascending = -not $SortBy.Descending
                 [void][Everything3SDK]::Everything3_AddSearchSort($searchState, $sortPropId, $ascending)
             }
@@ -193,47 +203,49 @@ function Search-Everything {
         $resultList = [Everything3SDK]::Everything3_Search($Client.Handle, $searchState)
         
         if ($resultList -eq [IntPtr]::Zero) {
-            $error = [Everything3SDK]::Everything3_GetLastError()
-            throw "Suche fehlgeschlagen mit Fehler: $error"
+            $lastError = [Everything3SDK]::Everything3_GetLastError()
+            throw "Suche fehlgeschlagen mit Fehler: $lastError"
         }
         
         try {
             # Ergebnis-Anzahl abrufen
-            $viewportCount = [int][Everything3SDK]::Everything3_GetResultListViewportCount($resultList)
-            $totalCount = [int][Everything3SDK]::Everything3_GetResultListCount($resultList)
+            $viewportCount = [uint64][Everything3SDK]::Everything3_GetResultListViewportCount($resultList)
+            $totalCount = [uint64][Everything3SDK]::Everything3_GetResultListCount($resultList)
             
             Write-Verbose "Gefunden $totalCount Ergebnisse insgesamt, gebe $viewportCount zurück"
             
             # Ergebnisse verarbeiten
-            $results = @()
-            for ($i = 0; $i -lt $viewportCount; $i++) {
+            $results = [System.Collections.Generic.List[Everything3Result]]::new()
+            $pathBuffer = [System.Text.StringBuilder]::new(32768)
+            for ([uint64]$i = 0; $i -lt $viewportCount; $i++) {
+                $idx = [UIntPtr]::new($i)
                 # Vollständigen Pfad abrufen
-                $pathBuffer = New-Object System.Text.StringBuilder(32768)
-                $pathLength = [Everything3SDK]::Everything3_GetResultFullPathNameW($resultList, [uint32]$i, $pathBuffer, [uint32]$pathBuffer.Capacity)
-                Write-Verbose("Pathlength: " + $pathLength)
+                [void]$pathBuffer.Clear()
+                $pathLength = [uint64][Everything3SDK]::Everything3_GetResultFullPathNameW($resultList, $idx, $pathBuffer, [UIntPtr]::new([uint64]$pathBuffer.Capacity))
                 if ($pathLength -gt 0) {
                     $fullPath = $pathBuffer.ToString()
-                    $result = [Everything3Result]::new($fullPath)
+                    $result = [Everything3Result]::new($fullPath, $CheckExists.IsPresent)
                     
                     # Zusätzliche Eigenschaften abrufen
                     foreach ($propInfo in $propertyIds) {
                         # Write-Verbose("propInfo.Name: " + $propInfo.Name)
                         try {
                             if ($propInfo.Name -in @('DateCreated', 'DateModified', 'DateAccessed')) {
-                                $value = [Everything3SDK]::Everything3_GetResultPropertyUINT64($resultList, [uint32]$i, $propInfo.Id)
+                                $value = [Everything3SDK]::Everything3_GetResultPropertyUINT64($resultList, $idx, $propInfo.Id)
                                 $result.Properties[$propInfo.Name] = ConvertFrom-FileTime -FileTime $value
                             }
                             elseif ($propInfo.Name -eq 'Size') {
-                                $value = [Everything3SDK]::Everything3_GetResultPropertyUINT64($resultList, [uint32]$i, $propInfo.Id)
-                                $result.Properties[$propInfo.Name] = $value
+                                $value = [Everything3SDK]::Everything3_GetResultPropertyUINT64($resultList, $idx, $propInfo.Id)
+                                # UINT64_MAX = Größe unbekannt (z.B. Ordner) -> $null
+                                $result.Properties[$propInfo.Name] = if ($value -eq [uint64]::MaxValue) { $null } else { $value }
                             }
                             elseif ($propInfo.Name -eq 'Attributes') {
-                                $value = [Everything3SDK]::Everything3_GetResultPropertyDWORD($resultList, [uint32]$i, $propInfo.Id)
+                                $value = [Everything3SDK]::Everything3_GetResultPropertyDWORD($resultList, $idx, $propInfo.Id)
                                 $result.Properties[$propInfo.Name] = $value
                             }
                             else {
                                 $textBuffer = New-Object System.Text.StringBuilder(1024)
-                                $textLength = [Everything3SDK]::Everything3_GetResultPropertyTextW($resultList, [uint32]$i, $propInfo.Id, $textBuffer, [uint32]$textBuffer.Capacity)
+                                $textLength = [uint64][Everything3SDK]::Everything3_GetResultPropertyTextW($resultList, $idx, $propInfo.Id, $textBuffer, [UIntPtr]::new([uint64]$textBuffer.Capacity))
                                 if ($textLength -gt 0) {
                                     $result.Properties[$propInfo.Name] = $textBuffer.ToString()
                                 }
@@ -244,11 +256,11 @@ function Search-Everything {
                         }
                     }
                     
-                    $results += $result
+                    $results.Add($result)
                 }
             }
             
-            return $results
+            return $results.ToArray()
             
         }
         finally {
@@ -286,7 +298,9 @@ function Find-Files {
         [Parameter(Mandatory)]
         [string]$Pattern,
         
-        [int]$MaxResults = 1000,
+        [ValidateRange(0, [int]::MaxValue)]
+        [int]$MaxResults = 1000,              # 0 = alle Treffer
+        [switch]$CheckExists,
         [string[]]$Extensions = @(),
         [switch]$IncludeProperties,
         [switch]$CaseSensitive,
@@ -320,6 +334,7 @@ function Find-Files {
             Properties = $properties
             MatchCase  = $CaseSensitive
             Regex      = $Regex
+            CheckExists = $CheckExists
         }
         Write-Verbose($searchParams | ConvertTo-Json)
         return Search-Everything @searchParams
@@ -408,4 +423,4 @@ Export-ModuleMember -Function @(
 
 # Modul-Initialisierung
 Write-Verbose "Everything3 PowerShell Wrapper geladen. Verwenden Sie Test-EverythingConnection zum Testen."
-Write-Host "Everything3 PowerShell Wrapper bereit. Verwenden Sie Test-EverythingConnection zum Testen der Verbindung." -ForegroundColor Green
+Write-Verbose "Everything3 PowerShell Wrapper bereit. Verwenden Sie Test-EverythingConnection zum Testen der Verbindung."

@@ -34,7 +34,7 @@ catch {
 # Beispiel 3: Suche mit zusätzlichen Eigenschaften
 Write-Host "`n3. Suche mit Dateieigenschaften:" -ForegroundColor Yellow
 try {
-    $filesWithProps = Find-Files -Pattern "test*" -IncludeProperties -MaxResults 5
+    $filesWithProps = Find-Files -Pattern "test*" -IncludeProperties -MaxResults 5 -CheckExists
     Write-Host "Gefunden: $($filesWithProps.Count) Dateien"
     foreach ($file in $filesWithProps) {
         Write-Host "Datei: $($file.Name)" -ForegroundColor Green
@@ -381,7 +381,7 @@ function Start-InteractiveSearch {
             
             try {
                 $startTime = Get-Date
-                $results = Search-Everything -Client $client -Query $query -MaxResults 10 -Properties @("Size", "DateModified")
+                $results = Search-Everything -Client $client -Query $query -MaxResults 10 -Properties @("Size", "DateModified") -CheckExists
                 $endTime = Get-Date
                 $duration = ($endTime - $startTime).TotalMilliseconds
                 
