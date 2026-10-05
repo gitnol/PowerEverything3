@@ -5,15 +5,14 @@
 A powerful and user-friendly PowerShell wrapper for the [Everything Search Engine](https://www.voidtools.com/) (Version 1.5+). This module utilizes the `Everything3_x64.dll` from the Everything SDK to enable extremely fast file searches directly from the PowerShell console.
 
 Tested with:
-- PowerShell 7.5.2
-- Everything 1.5.0.1396a-x64
+- PowerShell 7.5.2 and 7.6
+- Everything 1.5.0.1423b-x64 (previously 1.5.0.1396a)
   - Website: https://www.voidtools.com/everything-1.5a/
-  - Download: https://www.voidtools.com/Everything-1.5.0.1396a.x64-Setup.exe 
-  - Size: (1703 KB - SHA256: 37f8f9359346b78a5e9820b5bae73044366a299eaaeba2d8a56fadf46bcc577e)
-- SDK Version 3.0.0.4 
+  - Changelog: https://www.voidtools.com/forum/viewtopic.php?f=12&t=9787
+- SDK Version 3.0.0.9 (included `Everything3_x64.dll`, signed by voidtools PTY LTD)
   - Website: https://www.voidtools.com/forum/viewtopic.php?t=15853
-  - Download: https://www.voidtools.com/Everything-SDK-3.0.0.4.zip 
-  - Size: (216 KB - SHA256: 48d76d7e90b2a3ea8f6db7626f27bd8f001e3163c826dae5de979430b226e62d) 
+  - Download: https://www.voidtools.com/Everything-SDK-3.0.0.9.zip
+  - Size: (503 KB - SHA256: 124685d35a5f49f3c1e9898853e166215748c893782c6a251f5dde58dacad4fa)
   - GitHub: https://github.com/voidtools/everything_sdk3
 
 ## Table of Contents
@@ -27,7 +26,10 @@ Tested with:
   - [Usage Examples](#usage-examples)
     - [Simple Searches with `Find-Files`](#simple-searches-with-find-files)
     - [Advanced Searches with `Search-Everything`](#advanced-searches-with-search-everything)
+    - [All Results and Existence Check](#all-results-and-existence-check)
+  - [Practical Example: Archives Left Next to Their Extracted Folder](#practical-example-archives-left-next-to-their-extracted-folder)
   - [VSCode Considerations](#vscode-considerations)
+  - [Changelog](#changelog)
   - [License \& Disclaimer](#license--disclaimer)
 
 ---
@@ -45,7 +47,7 @@ Tested with:
 
 ## Requirements
 
-- **PowerShell 5.1** or higher. **PowerShell 7.5.2** or higher is recommended
+- **PowerShell 7.0** or higher (the module uses PowerShell 7 syntax such as `??`; Windows PowerShell 5.1 is not supported). **PowerShell 7.5** or higher is recommended
 - **[Everything](https://www.voidtools.com/downloads/) v1.5a** or newer must be installed and running
 - The **`Everything3_x64.dll`** (from the official [Everything SDK](https://www.voidtools.com/support/everything/sdk/)) must be located in the same directory as the module
 
@@ -134,6 +136,57 @@ Disconnect-Everything -Client $client
 Find-Files -Pattern "size:0" -MaxResults 20
 ```
 
+### All Results and Existence Check
+
+`-MaxResults 0` returns **all** results. The `Exists` property is only filled when `-CheckExists` is set – a `Test-Path` per result is expensive (Everything results come from the index and are usually current anyway).
+
+```powershell
+$client = Connect-Everything
+
+# all ZIP files larger than 100 MB below a folder, with size and modification date
+$zips = Search-Everything -Client $client -Query 'file: ext:zip size:>100mb "D:\Data\"' -MaxResults 0 -Properties Size, DateModified
+$zips | Select-Object FullPath, @{ n = 'SizeMB'; e = { [math]::Round($_.Properties['Size'] / 1MB) } }
+
+# paging: results 101-200, sorted by name
+Search-Everything -Client $client -Query 'ext:pdf' -Offset 100 -MaxResults 100 -SortBy @{ Property = 'Name' }
+
+# verify that each result still exists on disk (slower)
+Search-Everything -Client $client -Query 'ext:iso' -MaxResults 50 -CheckExists | Where-Object { -not $_.Exists }
+
+Disconnect-Everything -Client $client
+```
+
+Text properties (`Name`, `Path`, `Extension`, `Type`) are returned as full strings. `Size` is `$null` when Everything does not know it (e.g. folders).
+
+---
+
+## Practical Example: Archives Left Next to Their Extracted Folder
+
+[`Examples/Find-ArchivesWithExtractedFolder.ps1`](Examples/Find-ArchivesWithExtractedFolder.ps1) is a complete file-server clean-up script built on this module. It finds archives (`zip`, `7z`, `rar`, `iso`, `tar.gz`, …) for which a folder with the same name already exists in the same location – i.e. archives that were extracted and then kept.
+
+- Searches via the Everything index in seconds; falls back to a parallel file-system scan if Everything is not available or a path is not indexed
+- `-AllShares` searches all data shares of the server (skips system shares, DFS roots and nested shares)
+- Resolves the owners of the extracted folders via ADSI/LDAP (no ActiveDirectory module/RSAT needed)
+- Writes a CSV and optionally sends one mail per owner; paths in mails are converted to `\\server\share\...`
+- Owners that cannot be mailed (deleted/disabled accounts, no mail address, BUILTIN\Administrators) end up in one summary mail to the helpdesk
+- Never deletes anything
+
+```powershell
+cd .\Examples
+Copy-Item .\Find-ArchivesWithExtractedFolder.config.example.ps1 .\Find-ArchivesWithExtractedFolder.config.ps1   # then adjust
+
+# dry run on the whole server: CSV only
+.\Find-ArchivesWithExtractedFolder.ps1 -AllShares -SearchMode Everything
+
+# test: all mails go to $DebugTo, at most 3
+.\Find-ArchivesWithExtractedFolder.ps1 -AllShares -SendMail -MaxMails 3
+
+# production: mails to the owners
+.\Find-ArchivesWithExtractedFolder.ps1 -AllShares -SearchMode Everything -SendMail -Live
+```
+
+Run it as administrator on the file server itself (needed for `Get-Acl` and `Get-SmbShare`). See the comment-based help (`Get-Help .\Find-ArchivesWithExtractedFolder.ps1 -Full`) for all parameters. Your real `*.config.ps1`, CSV and log files are excluded via `.gitignore`.
+
 ---
 
 ## VSCode Considerations
@@ -145,6 +198,24 @@ The module includes automatic workarounds for VSCode-specific issues when loadin
 - **Error Handling:** Robust handling of VSCode-specific parameter binding issues
 
 These measures ensure that the module functions correctly in both the regular PowerShell console and VSCode.
+
+---
+
+## Changelog
+
+**SDK 3.0.0.9, fixes and archive example**
+- Updated `Everything3_x64.dll` to SDK 3.0.0.9 (more robust pipe connection when Everything is busy, crash and memory-corruption fixes in the SDK – see the [SDK changelog](https://www.voidtools.com/forum/viewtopic.php?t=15853))
+- Fixed: P/Invoke signatures used `uint` for `SIZE_T` parameters/return values (index, count, buffer size) – now `UIntPtr` (64-bit on x64), as declared in `Everything3.h`
+- Fixed: text properties (`Name`, `Path`, `Extension`, `Type`) only returned their first character (`Everything3_GetResultPropertyTextW` was declared without `CharSet.Unicode`)
+- Fixed: the property `Name` and sorting by `Name` were silently ignored (property ID `0` was treated as "unknown")
+- Fixed: `$error` (automatic variable) was overwritten in error handling
+- New: `-MaxResults 0` returns all results; `-Offset` for paging is passed correctly
+- New: `-CheckExists` – `Exists` is only checked on request (`$null` otherwise). **Behaviour change:** previously `Test-Path` ran for every result
+- Faster: results are collected in a list instead of `+=` (5,000 results: 6.3 s → 0.5 s)
+- `Size` is `$null` instead of `18446744073709551615` when unknown (e.g. folders)
+- Loading the module no longer writes to the console (messages moved to `-Verbose`)
+- New example: `Examples/Find-ArchivesWithExtractedFolder.ps1`
+- Requirements corrected: PowerShell 7.0+
 
 ---
 

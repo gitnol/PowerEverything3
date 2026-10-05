@@ -1,0 +1,6 @@
+# Real configuration of the example (may contain internal addresses) – only the *.example.ps1 is versioned
+Examples/*.config.ps1
+
+# Output of the example
+Examples/*.csv
+Examples/*.log
