@@ -169,6 +169,11 @@ Text properties (`Name`, `Path`, `Extension`, `Type`) are returned as full strin
 - Resolves the owners of the extracted folders via ADSI/LDAP (no ActiveDirectory module/RSAT needed)
 - Writes a CSV and optionally sends one mail per owner; paths in mails are converted to `\\server\share\...`
 - Owners that cannot be mailed (deleted/disabled accounts, no mail address, BUILTIN\Administrators) end up in one summary mail to the helpdesk
+- **Content check:** compares every archive with its extracted folder and tells whether the archive is a redundant copy (`identical` – it can be deleted) or the folder has been worked on since (`changed`, with new/missing/changed files)
+  - level 1, always on: file list, sizes and timestamps from the archive directory – nothing is extracted, takes about a second per archive
+  - level 2, `-CheckContentCrc`: additionally compares the CRC32 of every file (reads all files – slow, only on request)
+  - ZIP is always checked; 7z, rar, iso, tar.gz etc. only if `7z.exe` (+ `7z.dll`) is found (`$SevenZip`, default `%ProgramFiles%\7-Zip`), otherwise `N/A`
+  - handles old ZIP file names in the DOS code page, the 1-hour daylight-saving offset of ZIP timestamps and their 2-second resolution; system files such as `Thumbs.db` are ignored
 - Never deletes anything
 
 ```powershell
@@ -183,7 +188,12 @@ Copy-Item .\Find-ArchivesWithExtractedFolder.config.example.ps1 .\Find-ArchivesW
 
 # production: mails to the owners
 .\Find-ArchivesWithExtractedFolder.ps1 -AllShares -SearchMode Everything -SendMail -Live
+
+# your own PC: all local fixed disks, with CRC content check
+.\Find-ArchivesWithExtractedFolder.ps1 -Path ((Get-CimInstance Win32_LogicalDisk -Filter 'DriveType=3').DeviceID | ForEach-Object { $_ + '\' }) -SearchMode Everything -CheckContentCrc
 ```
+
+With `-SearchMode Everything`, paths that are not in the Everything index are skipped with a warning (summary at the end of phase 1); with `-SearchMode Auto` they are scanned.
 
 Run it as administrator on the file server itself (needed for `Get-Acl` and `Get-SmbShare`). See the comment-based help (`Get-Help .\Find-ArchivesWithExtractedFolder.ps1 -Full`) for all parameters. Your real `*.config.ps1`, CSV and log files are excluded via `.gitignore`.
 
@@ -202,6 +212,11 @@ These measures ensure that the module functions correctly in both the regular Po
 ---
 
 ## Changelog
+
+**Archive example: content check and index fix**
+- New: content check archive ↔ extracted folder (CSV columns `Content`/`ContentDetails`, column "Content" in mails); level 1 always, level 2 with `-CheckContentCrc`; formats other than ZIP via 7-Zip if available
+- Fixed: an empty but indexed folder was reported as "not in the Everything index" (the index check now counts the folder itself)
+- Changed: with `-SearchMode Everything` a path that is not indexed no longer aborts the whole run – it is skipped with a warning and listed at the end of phase 1
 
 **SDK 3.0.0.9, fixes and archive example**
 - Updated `Everything3_x64.dll` to SDK 3.0.0.9 (more robust pipe connection when Everything is busy, crash and memory-corruption fixes in the SDK – see the [SDK changelog](https://www.voidtools.com/forum/viewtopic.php?t=15853))

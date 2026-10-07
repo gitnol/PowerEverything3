@@ -13,7 +13,12 @@
 	  Phase 1  Find archives via the Everything index (seconds) using the
 	           Everything3-PowerShell-Wrapper module of this repository; falls back to a
 	           file-system scan (parallel per top-level folder) when Everything is not usable
-	           or a path is not indexed. Then checks for a same-named folder.
+	           or a path is not indexed (with -SearchMode Everything such paths are skipped
+	           instead). Then checks for a same-named folder.
+	  Phase 1c Content check archive <-> folder (always): file list, size, timestamp; with
+	           -CheckContentCrc additionally CRC32 per file. ZIP via .NET, other formats only with
+	           7-Zip ($SevenZip), otherwise "content check N/A". Result: CSV columns
+	           Content/ContentDetails and a "Content" column in the mail.
 	  Phase 2  Owners: Get-Acl in parallel, AD lookup per unique SID via ADSI/LDAP
 	           (no ActiveDirectory module / RSAT required).
 	  Phase 3  CSV export (UTF-8 with BOM, opens fine in Excel).
@@ -48,6 +53,10 @@
 	.\Find-ArchivesWithExtractedFolder.ps1 -AllShares -SendMail -SummaryOnly
 
 .EXAMPLE
+	# Local fixed disks of this machine, dry run, with CRC content check
+	.\Find-ArchivesWithExtractedFolder.ps1 -Path ((Get-CimInstance Win32_LogicalDisk -Filter 'DriveType=3').DeviceID | ForEach-Object { $_ + '\' }) -SearchMode Everything -CheckContentCrc
+
+.EXAMPLE
 	# Production: mails to the real owners
 	.\Find-ArchivesWithExtractedFolder.ps1 -AllShares -SearchMode Everything -SendMail -Live
 
@@ -64,6 +73,7 @@ param (
 	[switch]$SendMail,                             # actually send mails (default: CSV only)
 	[switch]$Live,                                 # mails to the real owners (default: everything to $DebugTo)
 	[switch]$SummaryOnly,                          # only the summary mail to $FallbackTo; users are never mailed
+	[switch]$CheckContentCrc,                      # content check additionally via CRC32 (reads every file of the folder – slow)
 	[ValidateRange(0, [int]::MaxValue)]
 	[int]$MaxMails            = 0,                 # max. mails per run (0 = unlimited)
 	[ValidateSet('Auto', 'Everything', 'Scan')]
@@ -106,6 +116,10 @@ $UncServer        = try { [System.Net.Dns]::GetHostEntry('').HostName } catch { 
 $IgnoredShares    = @('print$', 'SYSVOL', 'NETLOGON', 'CertEnroll', 'REMINST', 'WsusContent', 'UpdateServicesPackages')
 
 $EverythingModule = Join-Path $PSScriptRoot '..\Everything3-PowerShell-Wrapper.psd1'
+
+# Content check archive <-> extracted folder (always on; ZIP via .NET, other formats only with 7-Zip)
+$SevenZip      = Join-Path $env:ProgramFiles '7-Zip\7z.exe'   # portable: 7z.exe AND 7z.dll in one folder
+$ContentIgnore = '(^|/)(Thumbs\.db|desktop\.ini|\.DS_Store|~\$[^/]*|[^/]*\.tmp)$|(^|/)__MACOSX/'   # regex on the relative path with '/'
 
 if (Test-Path -LiteralPath $ConfigFile -PathType Leaf) {
 	. $ConfigFile
@@ -161,6 +175,137 @@ function Resolve-Owner([string]$sid) {
 	catch { $r.Name = $sid }
 	Write-Warning "Owner SID '$sid' ($($r.Name)) not found in AD."
 	return [PSCustomObject]$r
+}
+
+# ---- Content check archive <-> extracted folder ----
+
+# Runs 7z.exe with an argument list and returns its output (UTF-8). -ExtractFirst: decompress the archive
+# with "7z x -so" first and stream it into this call (for .tar.gz etc. – nothing is written to disk).
+function Invoke-SevenZip([string[]]$arguments, [string]$extractFirst) {
+	$psi = [System.Diagnostics.ProcessStartInfo]::new($SevenZip)
+	foreach ($a in $arguments) { $psi.ArgumentList.Add($a) }
+	$psi.UseShellExecute = $false; $psi.CreateNoWindow = $true
+	$psi.RedirectStandardOutput = $true; $psi.RedirectStandardError = $true
+	$psi.StandardOutputEncoding = [System.Text.Encoding]::UTF8
+	$psi.RedirectStandardInput = [bool]$extractFirst
+	$p = [System.Diagnostics.Process]::Start($psi)
+	$out = $p.StandardOutput.ReadToEndAsync(); $err = $p.StandardError.ReadToEndAsync()
+	if ($extractFirst) {
+		$psi2 = [System.Diagnostics.ProcessStartInfo]::new($SevenZip)
+		foreach ($a in 'x', '-so', '-bd', $extractFirst) { $psi2.ArgumentList.Add($a) }
+		$psi2.UseShellExecute = $false; $psi2.CreateNoWindow = $true
+		$psi2.RedirectStandardOutput = $true; $psi2.RedirectStandardError = $true
+		$q = [System.Diagnostics.Process]::Start($psi2)
+		$qErr = $q.StandardError.ReadToEndAsync()
+		try { $q.StandardOutput.BaseStream.CopyTo($p.StandardInput.BaseStream) } catch { }
+		$p.StandardInput.Close(); $q.WaitForExit(); [void]$qErr.Result
+	}
+	$p.WaitForExit()
+	return [PSCustomObject]@{ Exit = $p.ExitCode; Output = $out.Result; Error = $err.Result }
+}
+
+# Reads the directory of an archive (without extracting).
+# Result: {Ok, Reason, Entries[{Rel, Len, Time, Crc}]}; Rel uses '/', Crc = $null if unknown.
+function Get-ArchiveEntries([string]$archive) {
+	$list = [System.Collections.Generic.List[PSCustomObject]]::new()
+	try {
+		if ($archive -match '\.zip$') {
+			# entries without the UTF-8 flag are usually stored in the DOS code page (CP850 on Western
+			# European Windows) – otherwise umlauts become '?'
+			$zip = [System.IO.Compression.ZipFile]::Open($archive, 'Read', [System.Text.Encoding]::GetEncoding(850))
+			try {
+				foreach ($e in $zip.Entries) {
+					if ($e.FullName.EndsWith('/') -or $e.FullName.EndsWith('\')) { continue }
+					$crc = if ($zipHasCrc) { [Nullable[uint32]]$e.Crc32 } else { $null }   # ZipArchiveEntry.Crc32 needs .NET 7 / PowerShell 7.4
+					$list.Add([PSCustomObject]@{ Rel = $e.FullName.Replace('\', '/'); Len = $e.Length; Time = $e.LastWriteTime.DateTime; Crc = $crc })
+				}
+			} finally { $zip.Dispose() }
+			return [PSCustomObject]@{ Ok = $true; Reason = ''; Entries = $list }
+		}
+		if (-not $sevenZipAvailable) { return [PSCustomObject]@{ Ok = $false; Reason = 'content check N/A (no 7-Zip)'; Entries = $list } }
+
+		$r = if ($archive -match '\.(tar\.(gz|bz2?|xz)|tgz|tbz2?)$') { Invoke-SevenZip @('l', '-slt', '-sccUTF-8', '-si', '-ttar') $archive }
+		     else { Invoke-SevenZip @('l', '-slt', '-sccUTF-8', $archive) $null }
+		if ($r.Exit -ne 0) { return [PSCustomObject]@{ Ok = $false; Reason = 'content check N/A (archive not readable/encrypted)'; Entries = $list } }
+
+		$text = $r.Output -replace "`r", ''
+		$start = $text.IndexOf("`n----------`n")
+		if ($start -lt 0) { return [PSCustomObject]@{ Ok = $false; Reason = 'content check N/A (unknown 7-Zip output)'; Entries = $list } }
+		foreach ($block in ($text.Substring($start + 12) -split "`n`n")) {
+			$f = @{}
+			foreach ($line in ($block -split "`n")) { $i = $line.IndexOf(' = '); if ($i -gt 0) { $f[$line.Substring(0, $i)] = $line.Substring($i + 3) } }
+			if (-not $f.ContainsKey('Path')) { continue }
+			if (($f['Attributes'] -like 'D*') -or $f['Folder'] -eq '+') { continue }
+			$time = $null
+			if ($f['Modified']) { $time = [datetime]::ParseExact($f['Modified'].Substring(0, [Math]::Min(19, $f['Modified'].Length)), 'yyyy-MM-dd HH:mm:ss', [Globalization.CultureInfo]::InvariantCulture) }
+			$crc = if ($f['CRC']) { [Nullable[uint32]][Convert]::ToUInt32($f['CRC'], 16) } else { $null }
+			$list.Add([PSCustomObject]@{ Rel = $f['Path'].Replace('\', '/'); Len = [long]$(if ($f['Size']) { $f['Size'] } else { 0 }); Time = $time; Crc = $crc })
+		}
+		return [PSCustomObject]@{ Ok = $true; Reason = ''; Entries = $list }
+	} catch {
+		$ex = $_.Exception; while ($ex.InnerException) { $ex = $ex.InnerException }   # strip the .NET invocation wrapper
+		return [PSCustomObject]@{ Ok = $false; Reason = "content check N/A (archive not readable: $($ex.Message))"; Entries = $list }
+	}
+}
+
+# Compares the archive content with the extracted folder.
+# Level 1 (always): file list, size, timestamp (tolerance 2 s – ZIP resolution – or exactly 1 h – daylight saving).
+# Level 2 (-crc): additionally CRC32 of every file. System files ($ContentIgnore) do not count.
+# Result: {Status = identical | changed | N/A, Details}
+function Compare-ArchiveWithFolder([string]$archive, [string]$folder, [bool]$crc) {
+	$a = Get-ArchiveEntries $archive
+	if (-not $a.Ok) { return [PSCustomObject]@{ Status = 'N/A'; Details = $a.Reason } }
+
+	$files = @(Get-ChildItem -LiteralPath $folder -Recurse -File -Force -ErrorAction SilentlyContinue |
+		ForEach-Object { [PSCustomObject]@{ Rel = $_.FullName.Substring($folder.Length + 1).Replace('\', '/'); Len = $_.Length; Time = $_.LastWriteTime; Path = $_.FullName } })
+	$fH = @{}; foreach ($d in $files) { if ($d.Rel -notmatch $ContentIgnore) { $fH[$d.Rel.ToLowerInvariant()] = $d } }
+
+	# variants: archive as is, or without a common root folder ("Project.zip" contains "Project/...")
+	$variants = @(, $a.Entries)
+	$roots = @($a.Entries | ForEach-Object { ($_.Rel -split '/')[0] } | Sort-Object -Unique)
+	if ($roots.Count -eq 1 -and -not ($a.Entries | Where-Object { -not $_.Rel.Contains('/') })) {
+		$p = $roots[0].Length + 1
+		$variants += , @($a.Entries | ForEach-Object { [PSCustomObject]@{ Rel = $_.Rel.Substring($p); Len = $_.Len; Time = $_.Time; Crc = $_.Crc } })
+	}
+	$aH = $null; $best = -1
+	foreach ($v in $variants) {
+		$h = @{}; foreach ($e in $v) { if ($e.Rel -notmatch $ContentIgnore) { $h[$e.Rel.ToLowerInvariant()] = $e } }
+		$t = @($h.Keys | Where-Object { $fH.ContainsKey($_) }).Count
+		if ($t -gt $best) { $best = $t; $aH = $h }
+	}
+
+	$missing = @($aH.Keys | Where-Object { -not $fH.ContainsKey($_) })
+	$new     = @($fH.Keys | Where-Object { -not $aH.ContainsKey($_) })
+	$both    = @($aH.Keys | Where-Object { $fH.ContainsKey($_) })
+	$changed = [System.Collections.Generic.List[string]]::new()
+	$crcDiff = [System.Collections.Generic.List[string]]::new()
+	$crcNA   = 0
+	foreach ($k in $both) {
+		$x = $aH[$k]; $o = $fH[$k]
+		$timeOk = $true
+		if ($x.Time) { $d = [Math]::Abs(($x.Time - $o.Time).TotalSeconds); $timeOk = ($d -le 2) -or ([Math]::Abs($d - 3600) -le 2) }
+		if ($x.Len -ne $o.Len -or -not $timeOk) { $changed.Add($o.Rel); continue }
+		if ($crc) {
+			if ($null -eq $x.Crc) { $crcNA++ }
+			elseif ([PE3Crc32]::File($o.Path) -ne $x.Crc) { $crcDiff.Add($o.Rel) }
+		}
+	}
+
+	$parts = @()
+	if ($new.Count)     { $parts += "$($new.Count) new" }
+	if ($missing.Count) { $parts += "$($missing.Count) missing" }
+	if ($changed.Count) { $parts += "$($changed.Count) changed" }
+	if ($crcDiff.Count) { $parts += "$($crcDiff.Count) content changed (CRC)" }
+	$basis = "$($both.Count) of $($aH.Count) files"
+	if ($parts.Count -eq 0) {
+		$extra = if (-not $crc) { '' }
+			elseif ($crcNA -gt 0 -and $crcNA -eq $both.Count) { ', CRC not available (format without checksum)' }
+			elseif ($crcNA -gt 0) { ', CRC partly not available' }
+			else { ', CRC checked' }
+		return [PSCustomObject]@{ Status = 'identical'; Details = "$basis identical$extra" }
+	}
+	$examples = @(@($new | ForEach-Object { $fH[$_].Rel }) + @($changed) + @($crcDiff) + @($missing | ForEach-Object { $aH[$_].Rel }) | Select-Object -First 3)
+	return [PSCustomObject]@{ Status = 'changed'; Details = ('{0} (e.g. {1})' -f ($parts -join ', '), ($examples -join '; ')) }
 }
 
 function Test-MailAddress([string]$address) {
@@ -262,7 +407,7 @@ Keeping both wastes valuable server storage and should be avoided.<br/>
 (Alternatively, if their content differs, rename the archive or the folder.)<br/>
 <br/>
 <table border="1" cellpadding="3" style="border-collapse:collapse">
-<tr><th>Folder</th><th>Archive</th><th>Size (MB)</th>$(if ($isSummary) { '<th>Owner (folder)</th>' })</tr>
+<tr><th>Folder</th><th>Archive</th><th>Size (MB)</th><th>Content (archive &harr; folder)</th>$(if ($isSummary) { '<th>Owner (folder)</th>' })</tr>
 
 "@)
 	foreach ($e in $entries) {
@@ -270,6 +415,7 @@ Keeping both wastes valuable server storage and should be avoided.<br/>
 		[void]$sb.Append('<tr><td><a href="').Append($href).Append('">').Append((& $enc $e.Path)).Append('</a></td>')
 		[void]$sb.Append('<td>').Append((& $enc $e.Archive)).Append('</td>')
 		[void]$sb.Append('<td align="right">').Append(('{0:N0}' -f $e.SizeMB)).Append('</td>')
+		[void]$sb.Append('<td>').Append((& $enc $e.Content)).Append('</td>')
 		if ($isSummary) { [void]$sb.Append('<td>').Append((& $enc $e.Owner)).Append('</td>') }
 		[void]$sb.AppendLine('</tr>')
 	}
@@ -320,6 +466,32 @@ try {
 	if ($SummaryOnly)  { Write-Log "Summary only – the only mail goes to $FallbackTo, users are not mailed" -Level Highlight }
 	elseif (-not $Live) { Write-Log "Debug mode – all mails go to $DebugTo (-Live missing)" -Level Highlight }
 
+	# prepare the content check: ZIP via .NET (code page 850 for old ZIP names), other formats via 7-Zip
+	Add-Type -AssemblyName System.IO.Compression, System.IO.Compression.FileSystem
+	[System.Text.Encoding]::RegisterProvider([System.Text.CodePagesEncodingProvider]::Instance)
+	$zipHasCrc = $null -ne [System.IO.Compression.ZipArchiveEntry].GetProperty('Crc32')
+	$sevenZipAvailable = [bool]$SevenZip -and (Test-Path -LiteralPath $SevenZip -PathType Leaf)
+	if (-not ('PE3Crc32' -as [type])) {
+		Add-Type -TypeDefinition @'
+using System; using System.IO;
+public static class PE3Crc32 {
+	static readonly uint[] T = new uint[256];
+	static PE3Crc32() { for (uint i = 0; i < 256; i++) { uint c = i; for (int k = 0; k < 8; k++) c = (c & 1) != 0 ? 0xEDB88320u ^ (c >> 1) : c >> 1; T[i] = c; } }
+	public static uint File(string path) {
+		uint crc = 0xFFFFFFFFu; var buf = new byte[1 << 20];
+		using (var fs = new FileStream(path, FileMode.Open, FileAccess.Read, FileShare.ReadWrite, 1 << 20, FileOptions.SequentialScan)) {
+			int n; while ((n = fs.Read(buf, 0, buf.Length)) > 0) for (int i = 0; i < n; i++) crc = T[(crc ^ buf[i]) & 0xFF] ^ (crc >> 8);
+		}
+		return crc ^ 0xFFFFFFFFu;
+	}
+}
+'@
+	}
+	Write-Log ('Content check: ZIP always{0}; other formats {1}{2}' -f `
+		$(if ($zipHasCrc) { '' } else { ' (without CRC – needs PowerShell 7.4)' }),
+		$(if ($sevenZipAvailable) { "via 7-Zip ($SevenZip)" } else { 'N/A (no 7-Zip)' }),
+		$(if ($CheckContentCrc) { '; level 2 (CRC) active' } else { '' }))
+
 	$shares = @()
 	if ($ShareAutoMapping -or $AllShares) {
 		$shares = Get-DataShares
@@ -351,6 +523,7 @@ try {
 
 	$archives = [System.Collections.Generic.List[PSCustomObject]]::new()
 	$toScan   = [System.Collections.Generic.List[string]]::new()
+	$notIndexed = [System.Collections.Generic.List[string]]::new()   # only with -SearchMode Everything: skipped
 
 	if ($SearchMode -eq 'Scan') {
 		$Path | ForEach-Object { $toScan.Add($_) }
@@ -362,8 +535,14 @@ try {
 			$exts = ($ArchivePatterns | ForEach-Object { ($_ -split '\.')[-1] } | Sort-Object -Unique) -join ';'
 			foreach ($p in $Path) {
 				$pathQuery = '"{0}\"' -f $p.TrimEnd('\')
-				if (@(Search-Everything -Client $client -Query $pathQuery -MaxResults 1).Count -eq 0) {
-					if ($SearchMode -eq 'Everything') { throw "Path is not in the Everything index: $p" }
+				# Index check WITHOUT trailing "\": the folder itself counts – an empty but indexed
+				# folder returns 1, only a path that is not indexed returns 0.
+				if (@(Search-Everything -Client $client -Query ('"{0}"' -f $p.TrimEnd('\')) -MaxResults 1).Count -eq 0) {
+					if ($SearchMode -eq 'Everything') {
+						# do not abort the whole run (e.g. with -AllShares), but do not scan either
+						Write-Warning "Path is not in the Everything index and is skipped (-SearchMode Everything): $p"
+						$notIndexed.Add($p); continue
+					}
 					Write-Warning "Path is not in the Everything index, will be scanned: $p"
 					$toScan.Add($p); continue
 				}
@@ -435,6 +614,25 @@ try {
 		[PSCustomObject]@{ ArchivePath = $_.FullName; ArchiveName = $name; Folder = $folder; ExtractedFolder = $match; SizeMB = [long][math]::Floor($_.Length / 1MB) }
 	})
 	Write-Log ('Phase 1 done – {0:N0} of {1:N0} archives have a same-named folder (>= {2} MB)' -f $candidates.Count, $archives.Count, $ReportMinMB)
+	if ($notIndexed.Count -gt 0) {
+		Write-Log ('ATTENTION: {0:N0} path(s) not in the Everything index and NOT searched: {1} – index them in Everything or run with -SearchMode Auto (scan)' -f $notIndexed.Count, ($notIndexed -join ' · ')) -Level Notice
+	}
+
+	# ====================================================================
+	# Phase 1c: content check archive <-> extracted folder
+	#   level 1 always (archive directory + folder listing), level 2 (CRC) with -CheckContentCrc
+	# ====================================================================
+
+	$content = @{}
+	$sw = [System.Diagnostics.Stopwatch]::StartNew(); $n = 0
+	foreach ($c in $candidates) {
+		$n++
+		Write-Progress -Activity 'Content check archive <-> folder' -Status $c.ArchiveName -PercentComplete ($n * 100 / [Math]::Max(1, $candidates.Count))
+		$content[$c.ArchivePath] = Compare-ArchiveWithFolder $c.ArchivePath $c.ExtractedFolder $CheckContentCrc.IsPresent
+	}
+	Write-Progress -Activity 'Content check archive <-> folder' -Completed
+	$stat = @($content.Values | Group-Object Status | ForEach-Object { "$($_.Name): $($_.Count)" }) -join ' · '
+	Write-Log ('Phase 1c done – content check of {0:N0} archives in {1:mm\:ss}: {2}' -f $candidates.Count, $sw.Elapsed, $(if ($stat) { $stat } else { '–' }))
 
 	# ====================================================================
 	# Phase 2: owners (Get-Acl in parallel, AD per unique SID)
@@ -465,6 +663,8 @@ try {
 			MailPath          = Get-MailPath $c.Folder $ReplaceSource $ReplaceTarget $mailShares
 			Archive           = $c.ArchiveName
 			ExtractedFolder   = $c.ExtractedFolder
+			Content           = $content[$c.ArchivePath].Status
+			ContentDetails    = $content[$c.ArchivePath].Details
 			FolderOwnerMail   = $of.EmailAddress
 			FolderOwnerName   = $of.Name
 			FolderOwnerStatus = $of.Status
@@ -506,7 +706,14 @@ try {
 			$ownerMail = if ($isSummary) { $FallbackTo } else { $g.Name }
 			$to        = if ($Live -or $SummaryOnly) { $ownerMail } else { $DebugTo }
 			$entries = @($g.Group | Sort-Object SizeMB -Descending | ForEach-Object {
-				[PSCustomObject]@{ Path = $_.MailPath; Archive = $_.Archive; SizeMB = $_.SizeMB; Owner = '{0} ({1})' -f $_.FolderOwnerName, $_.FolderOwnerStatus }
+				[PSCustomObject]@{
+					Path = $_.MailPath; Archive = $_.Archive; SizeMB = $_.SizeMB
+					Owner = '{0} ({1})' -f $_.FolderOwnerName, $_.FolderOwnerStatus
+					# no switch here: inside a switch $_ would be the tested value instead of the CSV row
+					Content = if ($_.Content -eq 'identical') { 'identical – the archive can be deleted' }
+					          elseif ($_.Content -eq 'changed') { "folder was changed: $($_.ContentDetails)" }
+					          else { 'content check N/A' }
+				}
 			})
 			$body = New-MailBody -entries $entries -shownRecipient $ownerMail -isSummary $isSummary
 			try {

@@ -169,6 +169,11 @@ Text-Eigenschaften (`Name`, `Path`, `Extension`, `Type`) kommen vollständig zur
 - Ermittelt die Besitzer der entpackten Ordner per ADSI/LDAP (kein ActiveDirectory-Modul/RSAT nötig)
 - Schreibt eine CSV und verschickt optional eine Mail je Besitzer; Pfade in Mails werden zu `\\server\freigabe\...`
 - Nicht anschreibbare Besitzer (gelöschte/deaktivierte Konten, ohne Mailadresse, BUILTIN\Administratoren) landen in einer Sammelmail an den Helpdesk
+- **Inhaltsprüfung:** vergleicht jedes Archiv mit seinem entpackten Ordner und zeigt, ob das Archiv eine überflüssige Kopie ist (`identical` – kann gelöscht werden) oder im Ordner seitdem weitergearbeitet wurde (`changed`, mit neuen/fehlenden/geänderten Dateien)
+  - Stufe 1, immer aktiv: Dateiliste, Größen und Zeitstempel aus dem Archiv-Inhaltsverzeichnis – es wird nichts entpackt, etwa eine Sekunde je Archiv
+  - Stufe 2, `-CheckContentCrc`: vergleicht zusätzlich die CRC32 jeder Datei (liest alle Dateien – langsam, nur auf Wunsch)
+  - ZIP wird immer geprüft; 7z, rar, iso, tar.gz usw. nur, wenn `7z.exe` (+ `7z.dll`) gefunden wird (`$SevenZip`, Standard `%ProgramFiles%\7-Zip`), sonst `N/A`
+  - berücksichtigt alte ZIP-Dateinamen im DOS-Zeichensatz, den 1-Stunden-Versatz (Sommerzeit) von ZIP-Zeitstempeln und deren 2-Sekunden-Raster; Systemdateien wie `Thumbs.db` werden ignoriert
 - Löscht nie etwas
 
 ```powershell
@@ -183,7 +188,12 @@ Copy-Item .\Find-ArchivesWithExtractedFolder.config.example.ps1 .\Find-ArchivesW
 
 # Produktiv: Mails an die Besitzer
 .\Find-ArchivesWithExtractedFolder.ps1 -AllShares -SearchMode Everything -SendMail -Live
+
+# eigener PC: alle lokalen Festplatten, mit CRC-Inhaltsprüfung
+.\Find-ArchivesWithExtractedFolder.ps1 -Path ((Get-CimInstance Win32_LogicalDisk -Filter 'DriveType=3').DeviceID | ForEach-Object { $_ + '\' }) -SearchMode Everything -CheckContentCrc
 ```
+
+Mit `-SearchMode Everything` werden Pfade, die nicht im Everything-Index sind, mit Warnung übersprungen (Zusammenfassung am Ende von Phase 1); mit `-SearchMode Auto` werden sie gescannt.
 
 Als Administrator direkt auf dem Fileserver ausführen (nötig für `Get-Acl` und `Get-SmbShare`). Alle Parameter stehen in der Hilfe (`Get-Help .\Find-ArchivesWithExtractedFolder.ps1 -Full`). Die echte `*.config.ps1` sowie CSV- und Log-Dateien sind per `.gitignore` ausgeschlossen. Script und Mailtext sind auf Englisch; der Mailtext lässt sich in `New-MailBody` anpassen.
 
@@ -202,6 +212,11 @@ Diese Maßnahmen stellen sicher, dass das Modul sowohl in der normalen PowerShel
 ---
 
 ## Änderungen
+
+**Archiv-Beispiel: Inhaltsprüfung und Index-Korrektur**
+- Neu: Inhaltsprüfung Archiv ↔ entpackter Ordner (CSV-Spalten `Content`/`ContentDetails`, Spalte „Content“ in den Mails); Stufe 1 immer, Stufe 2 mit `-CheckContentCrc`; andere Formate als ZIP per 7-Zip, falls vorhanden
+- Behoben: Ein leerer, aber indizierter Ordner wurde als „nicht im Everything-Index“ gemeldet (die Index-Prüfung zählt jetzt den Ordner selbst mit)
+- Geändert: Mit `-SearchMode Everything` bricht ein nicht indizierter Pfad nicht mehr den ganzen Lauf ab – er wird mit Warnung übersprungen und am Ende von Phase 1 aufgelistet
 
 **SDK 3.0.0.9, Fehlerkorrekturen und Archiv-Beispiel**
 - `Everything3_x64.dll` auf SDK 3.0.0.9 aktualisiert (robustere Pipe-Verbindung, wenn Everything ausgelastet ist, Absturz- und Speicherfehler-Korrekturen im SDK – siehe [SDK-Changelog](https://www.voidtools.com/forum/viewtopic.php?t=15853))

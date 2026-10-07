@@ -24,6 +24,13 @@ $ShareAutoMapping = $true
 # $UncServer      = 'fileserver01.example.local'   # default: FQDN of this machine
 # $IgnoredShares  = @('print$', 'SYSVOL', 'NETLOGON')
 
+# Content check archive <-> extracted folder
+# ZIP is always checked; 7z/rar/iso/tar.gz only if 7-Zip is available (otherwise "content check N/A").
+# Portable: put 7z.exe AND 7z.dll into one folder (7za.exe alone cannot read rar/iso).
+# $SevenZip      = 'C:\Tools\7-Zip\7z.exe'      # default: %ProgramFiles%\7-Zip\7z.exe
+# System files that do not count in the comparison (regex on the relative path with '/')
+# $ContentIgnore = '(^|/)(Thumbs\.db|desktop\.ini|\.DS_Store|~\$[^/]*|[^/]*\.tmp)$|(^|/)__MACOSX/'
+
 # Optional: other archive types
 # $ArchivePatterns = @('*.7z', '*.zip', '*.iso', '*.rar', '*.tar', '*.tgz', '*.gz', '*.bz', '*.bz2', '*.xz', '*.s7z')
 
