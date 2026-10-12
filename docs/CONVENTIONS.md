@@ -77,6 +77,9 @@ Commit-Pflicht pro Inkrement: `docs/KICKOFF.md` Phase 3b. Stack-spezifisch nur:
     PSScriptAnalyzer `PSUseBOMForUnicodeEncodedFile`. Details: `testing/UNIT_TESTS.md` 7.6.
   - **Modulquellen:** heute UTF-8 ohne BOM **mit** Nicht-ASCII (Umlaute, `✓`) → 5 PSSA-Befunde; Entscheidung ASCII vs.
     BOM steht in `docs/TODO.md` (Niedrig). Bis dahin keine weiteren Nicht-ASCII-Zeichen in neue Modulzeilen.
+  - **Zeilenenden:** `.ps1`, `.psm1` und `.psd1` mit LF sind unkritisch (PowerShell liest beides), es gilt
+    `CONVENTIONS_COMMON.md` §2. Ausnahme: Authenticode-signierte Dateien — die Signatur gilt für die Bytes, sie
+    bleiben wie signiert (in `.gitattributes` als `binary`).
 
 ## 4. Prozessweite Side-Effects — Save/Restore-Pflicht
 

@@ -211,7 +211,7 @@ In **Module-Source** (`Public/*.ps1`, `Private/*.ps1`) ist die *bessere* Lösung
 **bei ASCII bleiben** (em-dash → `--`, Umlaute vermeiden). BOM-Pflicht verkompliziert
 Tools/Heredocs/Datei-Vergleiche und sollte sich auf Test-Files mit echten
 Lokalisierungs-Strings beschränken.
-Festgelegt ist diese Ausnahme von `CONVENTIONS_COMMON.md` §2 in `CONVENTIONS.md` §3.
+Festgelegt ist diese Ausnahme von `CONVENTIONS_COMMON.md` §2 in `CONVENTIONS.md`, Abschnitt „Dateiorganisation".
 
 ### 7.7 (entfällt) TLS 1.2 für PSGallery unter Windows PowerShell 5.1
 Das Projekt unterstützt nur PowerShell 7 (TLS-Defaults des Betriebssystems); der Template-Hinweis ist gestrichen.
@@ -310,7 +310,7 @@ committet wird:
    `PSUseSingularNouns`) sind kein Stopp; neue Findings zuerst beheben.
 2. **Gate 4 — Unit-Tests:** `Invoke-Pester tests/ -ExcludeTag Integration -Output Detailed` → 0 Failed (Integrationstests sind eigene Skripte oder tragen das Tag `Integration`).
 3. **Integrationstests (nicht-destruktiv):** falls vorhanden, gegen echte Instanz → Exit 0;
-   **kein `-EnableWriteTests`** ohne ausdrückliche Freigabe (siehe `INTEGRATION_TESTS.md`).
+   **kein `-EnableWriteTests`** ohne ausdrückliche Freigabe (siehe `testing/INTEGRATION_TESTS.md`, falls vorhanden).
 
 Zuordnung zur Marker-Kernmenge (`principles/VERTICAL_SLICE_FIRST.md`): Das Pester-Tag `Integration` steht in diesem
 Stack für alles, was eine echte Instanz braucht — Kernmarker `integration` und `live` zusammen. Gate 4 schließt es aus;
