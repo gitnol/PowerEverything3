@@ -4,3 +4,18 @@ Examples/*.config.ps1
 # Output of the example
 Examples/*.csv
 Examples/*.log
+
+# Stack powershell-automation (docs_template BOOTSTRAP.md Schritt 1)
+*.log
+config.ps1
+*.tmp
+*.secret
+
+# Secrets / certificates (docs/operations/SECRETS_MANAGEMENT.md)
+*.pfx
+*.pem
+*.key
+
+# Public repository: internal environment docs and the local denylist of the interna hook
+/docs/local/
+/.internal-terms
