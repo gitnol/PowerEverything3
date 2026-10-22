@@ -69,10 +69,10 @@ Set-Secret -Name 'PowerEverything3-Smtp' -Secret (Get-Credential)
 
 ```powershell
 # Verboten: SMTP-Passwort in der Konfigurationsdatei
-$SmtpPassword = 'Geheim123'
+$SmtpPassword = '<klartext-passwort>'
 
 # Verboten: Credential aus Klartext im Aufruf bauen
--SmtpCredential ([pscredential]::new('svc', (ConvertTo-SecureString 'Geheim123' -AsPlainText -Force)))
+-SmtpCredential ([pscredential]::new('svc', (ConvertTo-SecureString '<klartext-passwort>' -AsPlainText -Force)))
 ```
 
 ---

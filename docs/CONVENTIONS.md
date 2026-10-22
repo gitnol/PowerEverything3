@@ -29,11 +29,29 @@ Commit-Pflicht pro Inkrement: `docs/KICKOFF.md` Phase 3b. Stack-spezifisch nur:
 
 ## 2. PowerShell Code-Richtlinien
 
-- **CmdletBinding + Param:** Jede exportierte Funktion und jedes Skript mit `[CmdletBinding()]` und `param()`-Block.
+- **CmdletBinding + Param:** Jede exportierte Funktion und jedes Skript mit `[CmdletBinding()]` und `param()`-Block. Ohne
+  `[CmdletBinding()]` landen unbekannte Parameter still in `$args` — ein Tippfehler oder ein noch nicht gebauter
+  Schalter wirkt dann wie ein erfolgreicher Aufruf (Gegenstück im Test: `testing/UNIT_TESTS.md` 7.11). Das Template
+  verlangt es für **jede** Funktion; die internen Helfer `Get-PropertyId` und `ConvertFrom-FileTime` haben es nicht
+  (offen, `docs/TODO.md` I8).
 - **Approved Verbs:** Nur [genehmigte PowerShell-Verben](https://docs.microsoft.com/powershell/scripting/developer/cmdlet/approved-verbs-for-windows-powershell-commands) für Funktionsnamen.
   Bestehende öffentliche Namen (`Find-Files`) bleiben trotz `PSUseSingularNouns` — Umbenennen bräche Nutzer (§9).
 - **Fehlerbehandlung:** Skripte mit `$ErrorActionPreference = 'Stop'` (Beispielskript zusätzlich `Set-StrictMode -Version 3.0`).
   `try/catch` für alle externen Aufrufe. Kein leeres `catch {}` ohne Kommentar **und** Logging (`docs/architecture/ERROR_HANDLING.md`).
+- **Strict Mode:** `Set-StrictMode -Version 3.0` direkt danach — im Script bzw. am Anfang der `.psm1` (gilt dann im
+  Modul-Scope, nicht beim Aufrufer). Ohne Strict Mode liefern nicht initialisierte Variablen, Tippfehler in
+  Eigenschaftsnamen und Indizes außerhalb des Arrays still `$null`. Feste Version statt `Latest`: `Latest` wird mit
+  neuen PowerShell-Versionen strenger, ein Skript bricht dann ohne eigene Änderung. Optionale Eigenschaften
+  (z. B. bei CIM/WMI-Objekten) gezielt prüfen (`$obj.PSObject.Properties['Name']`), nicht den Strict Mode abschalten.
+  Stand: Das Beispielskript setzt ihn; `Everything3SDK.psm1` und `Everything3-PowerShell-Wrapper.psm1` nicht
+  (offen, `docs/TODO.md` I8).
+- **Typisierte Parameter und Rückgaben:** Jeder Parameter trägt einen Typ (`[string]`, `[int]`, `[datetime]`,
+  `[System.IO.FileInfo]`, eigene Klasse); `[object]` oder untypisiert nur mit Kommentar, warum. Funktionen mit
+  Rückgabewert deklarieren `[OutputType([Typ])]` — PowerShell prüft das nicht zur Laufzeit, es ist der Vertrag für
+  Leser, Tab-Vervollständigung und PSScriptAnalyzer (`PSUseOutputTypeCorrectly`). Strukturierte Rückgaben als
+  `[pscustomobject]` mit festen Feldern oder als Klasse, nicht als Hashtable mit wechselnden Schlüsseln.
+  Stand: Die Modulparameter sind typisiert (`[Everything3Client]`, `[int]`, `[string[]]`, `[hashtable]$SortBy`);
+  `[OutputType()]` fehlt an allen öffentlichen Funktionen (offen, `docs/TODO.md` I8).
 - **Eingabevalidierung:** `[ValidateNotNullOrEmpty()]`, `[ValidateRange()]`, `[ValidateSet()]` in `param()`-Blöcken. Fail-Fast vor Business-Logik.
 - **Keine Magic Strings:** Konstanten (Pfade, Mindestversionen, Puffergrößen) als `$script:`-Konstante am Dateianfang.
 - **Ausgabe:** Im Modul-Kern Diagnose nur über `Write-Verbose`/`Write-Warning`; das Modul schreibt beim Laden nichts auf
@@ -47,6 +65,10 @@ Commit-Pflicht pro Inkrement: `docs/KICKOFF.md` Phase 3b. Stack-spezifisch nur:
   [Everything3SDK]::Everything3_SetSearchMatchCase($searchState, $true)                         # ✗ bool leckt in die Ausgabe
   ```
   Tests, die nur „Output ist nicht null" prüfen, **maskieren** diesen Bug — exakt prüfen (`Count`, Typ/Wert).
+- **Änderungserkennung auf Text ordinal vergleichen:** `-eq`/`-ne` auf Strings vergleichen linguistisch
+  (kulturabhängig) — `'…' -ne '...'` kann `$false` liefern, obwohl sich der Text geändert hat. Ein Skript, das nur
+  geänderte Dateien zurückschreibt, übersprang so still einen Teil der Dateien, ohne Fehlermeldung. Für „hat sich
+  der Inhalt geändert?" `[string]::Equals($a, $b, [System.StringComparison]::Ordinal)` verwenden.
 
 ### 2.1 P/Invoke und native Handles (projektspezifisch)
 
@@ -62,7 +84,8 @@ Commit-Pflicht pro Inkrement: `docs/KICKOFF.md` Phase 3b. Stack-spezifisch nur:
 
 - **Modul:** Manifest `.psd1` ist der einzige Import-Einstieg; Interop (`Everything3SDK.psm1`) als `NestedModules`,
   öffentliche API im RootModule. Klassen im RootModule dürfen den `Add-Type`-Typ nur referenzieren, weil das
-  NestedModule vorher lädt (`docs/LESSONS_LEARNED.md` L1).
+  NestedModule vorher lädt (`docs/LESSONS_LEARNED.md` L1). Aufbau, Manifest, Modultests, native DLL und
+  Verteilung: `architecture/MODULE.md`.
 - **Beispielskripte** liegen unter `Examples/` bzw. im Root (`Everything3-Examples.ps1`) und nutzen nur exportierte
   Funktionen (`docs/architecture/PROJECT_LAYOUT.md`). Ihre echte Konfiguration (`*.config.ps1`) ist gitignored; versioniert
   wird nur `*.config.example.ps1`.
@@ -70,6 +93,10 @@ Commit-Pflicht pro Inkrement: `docs/KICKOFF.md` Phase 3b. Stack-spezifisch nur:
   ~300 Zeilen); Aufteilung ist I6.
 - **`FunctionsToExport` in der `.psd1` immer EXPLIZIT, niemals `'*'`.** Ebenso `CmdletsToExport`, `AliasesToExport`,
   `VariablesToExport` als leere Liste, solange nichts exportiert wird. Stand Init verletzt (`'*'`) → I2.
+  Die Liste steht **nur im Manifest** — kein zweites `Export-ModuleMember` mit eigener Liste in der `.psm1`: Wirksam
+  ist die Schnittmenge beider, ein Name, der nur im Manifest steht, fehlt nach dem Import ohne Fehlermeldung
+  (gemessen mit PowerShell 7.6). Stand: `Everything3-PowerShell-Wrapper.psm1` endet mit `Export-ModuleMember`
+  (fünf Funktionen) — entfernen, sobald das Manifest die Liste trägt (offen, `docs/TODO.md` I8).
 - **Manifest deklariert die Laufzeit:** `PowerShellVersion`, `CompatiblePSEditions = @('Core')`,
   `ProcessorArchitecture = 'Amd64'` — Fail-Fast beim Import statt Parserfehler. Stand Init fehlt → I2.
 - **Encoding-Ausnahmen** (Vorrang vor `CONVENTIONS_COMMON.md` §2, sonst gilt UTF-8 ohne BOM):
@@ -90,7 +117,12 @@ zurücksetzt:
 
 - `$env:*` und `[Environment]::SetEnvironmentVariable(... 'Process')` — **im Projekt verletzt:**
   `Everything3SDK.psm1` stellt das Modulverzeichnis vor `$env:PATH` (`docs/KNOWN_ISSUES.md` K2, Fix in I2)
-- `[System.Net.ServicePointManager]::SecurityProtocol` (TLS-Set — wirkt auf **jede** Verbindung der Session)
+- `[System.Net.ServicePointManager]::CertificatePolicy` / `SecurityProtocol`
+  (TLS-Vertrauen und Protokoll-Set — wirken auf **jede** HTTPS-Verbindung der Session). **PowerShell 7:**
+  `SecurityProtocol` wirkt nicht auf `Invoke-WebRequest`/`Invoke-RestMethod` (HttpClient; TLS-Version bei Bedarf
+  per `-SslProtocol` am Aufruf), nur auf `WebClient`/`HttpWebRequest`, und der Prozess startet mit
+  `SystemDefault`. Ein Modul für PS 7 setzt die Eigenschaft deshalb gar nicht — Setzen überschreibt nur die
+  Einstellung anderer Skripte der Sitzung. Im Projekt nicht gesetzt (Stand 2026-10-22).
 - `Set-Location` (CWD) ohne `Push-Location`/`Pop-Location`
 - `$ErrorActionPreference`, `$ProgressPreference`, `$VerbosePreference` global statt lokal
 - `Add-Type` und `LoadLibrary` (lassen sich nicht entladen — nur über Typ-Existenz-Check schützen; die native DLL bleibt
