@@ -136,6 +136,34 @@ u. a. CVE-2026-14266 (XZ-Heap-Overflow, RCE); `WaitForExit()` hat keinen Timeout
 - [ ] Advocatus-Diaboli-Hook (`.claude/settings.json`, `KICKOFF.md` Phase 1 Punkt 7) nach Freigabe durch den
       Maintainer einrichten; bis dahin das Gate vor jedem Commit manuell ausführen.
 
+### I8: Modulvertrag an `architecture/MODULE.md` und CONVENTIONS (v28) angleichen
+
+Anlass: Das Template-Update auf v28 (2026-10-22) brachte `architecture/MODULE.md` und neue Regeln in
+`CONVENTIONS.md` §2/§3. Der Code weicht dort ab, wo I2 nicht schon ansetzt (Stellen in `MODULE.md` und
+`CONVENTIONS.md` als „offen" markiert). Nach I2 einplanen — mehrere Punkte bauen auf dessen Manifest und Harness auf.
+
+**Aufgaben:**
+
+- [ ] `Set-StrictMode -Version 3.0` am Anfang von `Everything3SDK.psm1` und `Everything3-PowerShell-Wrapper.psm1`;
+      Unit- und Integrationstests laufen danach grün.
+- [ ] `Export-ModuleMember` am Ende von `Everything3-PowerShell-Wrapper.psm1` entfernen (Liste nur im Manifest);
+      Modultest „exportiert genau die fünf Funktionen" bleibt grün.
+- [ ] DLL-Prüfung mit `MODULE.md` „Native Binärdateien" abgleichen: SHA-256 bei jedem Import im Modulcode,
+      Authenticode beim Austausch der DLL (I2 plant Authenticode bei jedem Import); danach steht die Prüfsumme nur im
+      Code, `architecture/DEPENDENCIES.md` nennt Herkunft, Version und Signaturergebnis.
+- [ ] DLL per `[System.Runtime.InteropServices.NativeLibrary]::Load` laden statt über den eigenen `Kernel32`-Typ
+      (`LoadLibrary` ohne `CharSet` bindet die ANSI-Variante).
+- [ ] `[CmdletBinding()]` an `Get-PropertyId` und `ConvertFrom-FileTime`; `[OutputType()]` an den fünf öffentlichen
+      Funktionen.
+- [ ] Installation in einen versionierten Ordner (aus einem Commit, Modulpfad für alle Benutzer) in README (EN/DE)
+      und `operations/SETUP.md` beschreiben.
+- [ ] Entscheiden: Template-Aufbau (`Public/`, `Private/`, `bin/`) übernehmen oder die Abweichung in `MODULE.md` als
+      bewusst festhalten.
+
+**Zusätzliche DoD** (nur, was über die Standard-DoD hinausgeht):
+
+- [ ] Keine „offen"-Markierung mit Verweis auf I8 mehr in `MODULE.md` und `CONVENTIONS.md`.
+
 ---
 
 ## Abgeschlossen
