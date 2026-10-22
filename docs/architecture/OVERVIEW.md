@@ -97,7 +97,8 @@ baut auf dem vorigen auf:
 3. `architecture/CONFIGURATION.md` — wie Modul und Beispielskript konfiguriert werden.
 4. `architecture/ERROR_HANDLING.md` — wie Fehler propagiert und behandelt werden.
 5. `architecture/ADR/` — historische Architekturentscheidungen (bisher nur die Vorlage `ADR-000-template.md`).
-6. **Stack-spezifische Architektur-Docs:** `architecture/DEPENDENCIES.md` (DLL, Everything, 7-Zip, AD, SMTP) und
+6. **Stack-spezifische Architektur-Docs:** `architecture/MODULE.md` (Modulaufbau, Manifest, native DLL, Installation),
+   `architecture/DEPENDENCIES.md` (DLL, Everything, 7-Zip, AD, SMTP) und
    `architecture/CREDENTIAL_STRATEGY.md` (SMTP-Credential, Ausführungskonto).
 7. Feature-Docs: `features/EVERYTHING_SEARCH.md` (Modul), `features/ARCHIVE_CLEANUP.md` (Beispielskript inkl. Geschäftsregeln).
 

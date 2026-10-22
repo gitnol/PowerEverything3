@@ -138,6 +138,7 @@ sparen. Ein-Befehl-Variante: `<Template-Root>/scripts/validate_project_docs.sh d
 | Datenfluss oder Systemarchitektur geändert | `docs/architecture/OVERVIEW.md` → Mermaid `flowchart TD` aktualisieren |
 | Auth-Flow oder Session-Handling geändert | `docs/architecture/OVERVIEW.md` + `docs/security/AUTHENTICATION.md` + `docs/architecture/CREDENTIAL_STRATEGY.md` |
 | Neues Paket / externe Bibliothek / Binary | `docs/architecture/DEPENDENCIES.md` |
+| Öffentliche Funktion neu/entfernt, Versionswechsel, native DLL ausgetauscht, Installationsweg geändert | `docs/architecture/MODULE.md` + Manifest (`.psd1`) |
 | Neuer externer Service / API / CDN | `docs/architecture/DEPENDENCIES.md` → Externe Services |
 | Neuer Parameter / Konfigurationsoption | `README.md` + `docs/features/` |
 | Security-relevante Änderung | `docs/security/` (THREAT_MODEL anhand THREAT_MODEL_GUIDE, DATA_HANDLING, AUTHENTICATION) |
