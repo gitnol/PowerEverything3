@@ -1,6 +1,6 @@
 # Aktueller Projektstatus – PowerEverything3
 
-Zuletzt aktualisiert: 2026-10-22
+Zuletzt aktualisiert: 2026-11-03
 **Initialisiert mit:** docs_template v27@5ce0f84 → v27@2268889 → v28@63b85ec (2026-10-22, Delta-Update)
 **Stack / Overlays:** powershell-automation / keine
 **Letztes abgeschlossenes Inkrement:** I1 – Projektdokumentation initialisiert (docs_template-Baseline) (2026-10-11)
@@ -38,6 +38,7 @@ siehe `docs/CHANGELOG.md` I1.
 | I5 | Integrationstests (read-only) gegen eine lokale Everything-Instanz | Mittel |
 | I6 | Beispielskript testbar machen (Funktionen vom Ablauf trennen) + Unit-Tests der reinen Funktionen | Mittel |
 | I7 | Mailversand: Transport-Entscheidung (ADR) und TLS-Default | Mittel |
+| I9 | SDK3 auf 3.0.1.12 prüfen und ggf. aktualisieren (DLL im Repo: 3.0.0.9; Verträglichkeit mit Everything 1.5.0.1424b ungeprüft) | Mittel |
 
 ---
 

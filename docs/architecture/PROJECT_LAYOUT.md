@@ -45,6 +45,8 @@ PowerEverything3/
 ├── Examples/
 │   ├── Find-ArchivesWithExtractedFolder.ps1
 │   └── Find-ArchivesWithExtractedFolder.config.example.ps1   # echte *.config.ps1, *.csv, *.log: gitignored
+├── skills/everything-search/SKILL.md     # Skill für KI-Agenten (englisch, öffentlich, ohne Interna)
+├── tests/Integration/                    # Pester-Integrationstests gegen lokales Everything (Tag Integration)
 ├── tools/git-hooks/                      # Interna-Hook (pre-commit, commit-msg)
 ├── docs/                                 # dieses Doku-Set (docs/local/ gitignored)
 ├── README.md, README-DE.md, LICENSE

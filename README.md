@@ -28,6 +28,7 @@ Tested with:
     - [Advanced Searches with `Search-Everything`](#advanced-searches-with-search-everything)
     - [All Results and Existence Check](#all-results-and-existence-check)
   - [Practical Example: Archives Left Next to Their Extracted Folder](#practical-example-archives-left-next-to-their-extracted-folder)
+  - [AI Agent Skill](#ai-agent-skill)
   - [VSCode Considerations](#vscode-considerations)
   - [Changelog](#changelog)
   - [License \& Disclaimer](#license--disclaimer)
@@ -199,6 +200,11 @@ Run it as administrator on the file server itself (needed for `Get-Acl` and `Get
 
 ---
 
+## AI Agent Skill
+
+[`skills/everything-search/SKILL.md`](skills/everything-search/SKILL.md) is a skill for AI coding agents (for example Claude Code).
+It teaches the module's usage and the search-syntax pitfalls measured against Everything 1.5 (round brackets do not group, `ext:a;b` instead of `ext:a|b`, long paths instead of 8.3 short paths). To use it, copy the folder `skills/everything-search` to `~/.claude/skills/` (or into the `.claude/skills/` folder of a project) and point `<path-to-repo>` in it to your clone.
+
 ## VSCode Considerations
 
 The module includes automatic workarounds for VSCode-specific issues when loading native DLLs:
@@ -212,6 +218,9 @@ These measures ensure that the module functions correctly in both the regular Po
 ---
 
 ## Changelog
+
+**AI agent skill**
+- New: `skills/everything-search` – skill for AI coding agents (usage of the module, verified search-syntax pitfalls, requirements)
 
 **`Find-Files -Extensions` fix**
 - Fixed: `Find-Files -Extensions` returned nothing on Everything 1.5 because the query was built as `(ext:a|ext:b)` and Everything does not treat round brackets as grouping. It now builds `ext:a;b`, and leading dots (`.pdf`) are accepted (reported in issue #1)

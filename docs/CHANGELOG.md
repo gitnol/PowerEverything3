@@ -13,6 +13,31 @@ Die Änderungshistorie **vor** I1 (SDK-Update 3.0.0.9, P/Invoke-Fixes, Beispiels
 
 ---
 
+## 2026-11-03 Öffentlicher Skill `everything-search` (ohne I#, auf Wunsch des Maintainers; Roadmap unverändert)
+
+### Added
+- `skills/everything-search/SKILL.md` (englisch, ohne Interna): Nutzung des Moduls, Voraussetzungen, Suchsyntax-Stolperfallen
+  mit Messbeleg (runde Klammern gruppieren nicht, `ext:a;b` statt `ext:a|b`, 8.3-Kurzpfade), Prüfungen vor dem Verlassen auf
+  Treffer. README (EN/DE) um Abschnitt und Changelog ergänzt, `docs/architecture/PROJECT_LAYOUT.md` um `skills/` und `tests/`.
+- I9 (SDK 3.0.1.12 prüfen) in `docs/TODO.md` angelegt.
+
+### Security
+- DLL-Befund (2026-11-03): `Everything3_x64.dll` im Repo = SDK 3.0.0.9, Authenticode `Valid` (voidtools PTY LTD), SHA256
+  wie in `DEPENDENCIES.md`. Online liegt SDK 3.0.1.12 (HEAD-Abfrage, nicht geladen). Everything 1.5.0.1424b (2026-10-15)
+  ändert IPC-Sicherheit und Dienstprüfung — Verträglichkeit mit der 3.0.0.9-DLL ungeprüft (I9).
+
+### Confidence / Ungeprüft
+- (a) Nicht getestet: Skill nicht in einer Agentensitzung ausprobiert; Everything 1.5.0.1424b nicht installiert; die
+  Aussage „nur Clients derselben Sitzung" stammt aus dem Herstellerchangelog, nicht aus eigener Messung.
+- (b) Ungeprüft übernommen: SDK-3.0.1.12-Version und Datum aus Forenbeitrag und HTTP-Header; Inhalt/Version der DLL im ZIP unbekannt.
+- (c) Die Syntaxfakten im Skill sind am 2026-11-03 gegen 1.5.0.1423b gemessen (Fix-Eintrag unten); Rangfolge von `|` gegenüber
+  Leerzeichen wurde bewusst nicht als Regel aufgenommen. Zusätzlich gemessen: leerer Ordner → 1 Treffer ohne, 0 mit
+  abschließendem `\`. Die übrige Kurzreferenz (`wfn:`, `parent:`, `dupe:`, `regex:`, `dm:` …) stammt aus der Everything-Doku und ist nicht gemessen.
+- Struktur-Check: `validate_project_docs.sh` nicht ausgeführt; Advocatus-Diaboli-Gate manuell im Chat. Security-Sweep laut
+  `STATE.md` seit 2026-10-25 fällig, nicht durchgeführt.
+
+---
+
 ## 2026-11-03 Fix – `Find-Files -Extensions` (GitHub-Issue #1)
 
 ### Fixed

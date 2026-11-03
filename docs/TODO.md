@@ -124,6 +124,22 @@ u. a. CVE-2026-14266 (XZ-Heap-Overflow, RCE); `WaitForExit()` hat keinen Timeout
 - [ ] Default von `$SmtpUseSsl` festlegen (heute `$false`, Port 25) und begründen.
 - [ ] `docs/architecture/CONFIGURATION.md`, `docs/operations/SETUP.md`, README nachziehen.
 
+### I9: SDK3 auf 3.0.1.12 prüfen und ggf. aktualisieren
+
+Anlass (2026-11-03): Das Repo liefert `Everything3_x64.dll` aus SDK 3.0.0.9 (`Everything-SDK-3.0.0.9.zip`, 515026 Byte,
+Stand 2025-10-11). Auf voidtools.com liegt `Everything-SDK-3.0.1.12.zip` (524889 Byte, Last-Modified 2026-10-16 — Header
+per HEAD-Abfrage gelesen, ZIP nicht geladen). Everything 1.5.0.1424b (2026-10-15) ändert laut Changelog die IPC-Sicherheit
+(nur Clients derselben Sitzung) und prüft die Vertrauenswürdigkeit des Dienstes; der Installer entfernt die Instanz `1.5a`.
+Ob die 3.0.0.9-DLL damit weiter funktioniert, ist ungeprüft; lokal läuft 1.5.0.1423b.
+
+**Aufgaben:**
+
+- [ ] ZIP in ein leeres Verzeichnis laden (Download vorher freigeben), SHA256, Authenticode und `FileVersion` der DLL prüfen.
+- [ ] `Everything3.h` der neuen Version gegen die Signaturen in `Everything3SDK.psm1` abgleichen (Änderungen seit 3.0.0.9).
+- [ ] Integrationstests (I5 bzw. `tests/Integration/`) und `Test-EverythingConnection` gegen 1.5.0.1423b **und** 1.5.0.1424b.
+- [ ] DLL, SHA256, Signaturstatus in `docs/architecture/DEPENDENCIES.md` und README („Tested with“) nachziehen;
+      Security-Sweep-Befund (`docs/security/DEPENDENCY_AUDIT.md`) datiert eintragen.
+
 ---
 
 ## Niedrige Priorität

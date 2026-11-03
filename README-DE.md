@@ -28,6 +28,7 @@ Getestet wurde es mit:
     - [Erweiterte Suchen mit `Search-Everything`](#erweiterte-suchen-mit-search-everything)
     - [Alle Treffer und Existenzprüfung](#alle-treffer-und-existenzprüfung)
   - [Praxisbeispiel: Archive neben ihrem entpackten Ordner](#praxisbeispiel-archive-neben-ihrem-entpackten-ordner)
+  - [KI-Agenten-Skill](#ki-agenten-skill)
   - [VSCode-Besonderheiten](#vscode-besonderheiten)
   - [Änderungen](#änderungen)
   - [Lizenz \& Haftungsausschluss](#lizenz--haftungsausschluss)
@@ -199,6 +200,11 @@ Als Administrator direkt auf dem Fileserver ausführen (nötig für `Get-Acl` un
 
 ---
 
+## KI-Agenten-Skill
+
+[`skills/everything-search/SKILL.md`](skills/everything-search/SKILL.md) ist ein Skill für KI-Coding-Agenten (z. B. Claude Code, englischsprachig).
+Er vermittelt die Nutzung des Moduls und die gegen Everything 1.5 gemessenen Stolperfallen der Suchsyntax (runde Klammern gruppieren nicht, `ext:a;b` statt `ext:a|b`, lange Pfade statt 8.3-Kurzpfade). Zur Nutzung den Ordner `skills/everything-search` nach `~/.claude/skills/` (oder in den Ordner `.claude/skills/` eines Projekts) kopieren und `<path-to-repo>` darin auf den eigenen Klon setzen.
+
 ## VSCode-Besonderheiten
 
 Das Modul enthält automatische Workarounds für VSCode-spezifische Probleme beim Laden nativer DLLs:
@@ -212,6 +218,9 @@ Diese Maßnahmen stellen sicher, dass das Modul sowohl in der normalen PowerShel
 ---
 
 ## Änderungen
+
+**KI-Agenten-Skill**
+- Neu: `skills/everything-search` – Skill für KI-Coding-Agenten (Modulnutzung, geprüfte Stolperfallen der Suchsyntax, Voraussetzungen)
 
 **`Find-Files -Extensions` korrigiert**
 - Behoben: `Find-Files -Extensions` lieferte unter Everything 1.5 keine Treffer, weil die Suche als `(ext:a|ext:b)` gebaut wurde und Everything runde Klammern nicht als Gruppierung kennt. Die Suche lautet jetzt `ext:a;b`, führende Punkte (`.pdf`) werden akzeptiert (gemeldet in Issue #1)
