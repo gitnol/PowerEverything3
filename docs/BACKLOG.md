@@ -23,6 +23,8 @@ Wenn ein Backlog-Punkt für ein Inkrement vorgesehen wird → Verschiebung von
 - `es.exe` (Everything-Kommandozeile) als zweites Orakel für Integrationstests (I5) — nur, wenn es auf Testhosts verfügbar ist.
 - Schichtregel als Pester-AST-Test: Beispielskripte rufen nur exportierte Funktionen auf, nie `[Everything3SDK]`
   direkt (`docs/architecture/PROJECT_LAYOUT.md`).
+- 8.3-Kurzpfade in Queries: `Search-Everything` liefert dafür still 0 Treffer (von einem Probelauf als leicht mit „Ordner leer“
+  verwechselbar gemeldet) — bei einem Muster wie `~1` im Pfad warnen oder per `GetLongPathNameW` auflösen (Skill-Probelauf 2026-11-03).
 - Verständliche Fehlermeldungen: SDK-Fehlercodes (z. B. 0xE0000002 pipe not found, 0xE0000003 disconnected) übersetzen; bei 0xE0000003 auf die Sitzungsbindung von Everything ab 1.5.0.1424b hinweisen (`docs/KNOWN_ISSUES.md` K6).
 
 ---

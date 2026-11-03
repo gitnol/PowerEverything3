@@ -13,6 +13,29 @@ Die Änderungshistorie **vor** I1 (SDK-Update 3.0.0.9, P/Invoke-Fixes, Beispiels
 
 ---
 
+## 2026-11-03 Skill-Probelauf `everything-search` (Agentensitzung)
+
+### Tested
+- Ein frischer Subagent bekam nur den Skill, das Modul und vier Aufgaben an einem Fixture-Ordner (5 Treffer für PDF/DOCX plus
+  zwei Köder-Dateien, ein leerer Unterordner, ein Kurzpfad). Alle vier Antworten stimmen mit dem Dateisystem-Orakel überein: 5 Dateien
+  (Köder nicht dabei), leerer Ordner ist indexiert (1 Treffer ohne, 0 mit Backslash), Kurzpfad liefert 0, Langpfad 8 Dateien,
+  SYSTEM-Task kann nicht suchen (Fallback nötig). Verwendet hat der Agent `ext:pdf;docx`, `Search-Everything` in `try/finally`
+  und `GetLongPathNameW`; sein Hilfsordner wurde gelöscht.
+
+### Changed
+- `skills/everything-search/SKILL.md` nach den Rückmeldungen des Agenten: Snippet für `GetLongPathNameW` (getestet), Hinweis, dass ein
+  Kurzpfad still 0 Treffer liefert, `Search-Everything` als Standardweg, Manifest im Repo-Root, und der Backslash-Befund präzisiert
+  (gemessen: ohne `\` Ordner **und** alles darunter = 11, mit `\` nur darunter = 10, mit `file:` = 8) — die alte Formulierung „der Ordner
+  selbst“ war ungenau.
+- `docs/BACKLOG.md`: Warnung/Auflösung bei 8.3-Kurzpfaden.
+
+### Confidence / Ungeprüft
+- (a) Ein Lauf, ein Agent; die Aufgaben schrieb ich in Kenntnis der Fallen, der Agent hatte die Fallenliste im Skill — geprüft ist die
+  Verständlichkeit, nicht ob ein Agent die Fallen ohne Skill findet. Andere Modelle ungetestet.
+- (b) Die Verbesserungsvorschläge des Agenten (z. B. `Resolve-LongPath` im Modul) sind Vorschläge, nicht gemessen; nur das Snippet und die Zahlen wurden von mir geprüft.
+
+---
+
 ## 2026-11-03 Reflexion nach I9/I10 (`KICKOFF.md` Phase 1c)
 
 ### Selbstkritik (Advocatus Diaboli, belegt)

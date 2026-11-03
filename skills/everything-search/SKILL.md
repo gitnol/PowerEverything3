@@ -20,7 +20,7 @@ Everything SDK3 (`Everything3_x64.dll`) and is read-only: it only searches, it n
 ## Quick start
 
 ```powershell
-Import-Module <path-to-repo>\Everything3-PowerShell-Wrapper.psd1
+Import-Module <path-to-repo>\Everything3-PowerShell-Wrapper.psd1   # the manifest sits in the repo root
 Test-EverythingConnection        # is Everything reachable?
 
 $client = Connect-Everything
@@ -36,7 +36,8 @@ finally { Disconnect-Everything -Client $client }   # always release the native 
 - Result objects have `FullPath`, `Name`, `Directory`; with `-Properties` the values are in `.Properties['Size']`
   (`$null` when unknown, e.g. folders). Available: `Name, Path, FullPath, Size, DateCreated, DateModified,
   DateAccessed, Attributes, Type, Extension`. `Exists` is only filled with `-CheckExists` (a `Test-Path` per hit is slow).
-- `Find-Files -Pattern '*' -Extensions pdf, docx` is the short form for extension searches (leading dots are accepted).
+- `Search-Everything` is the general way for every query (paths, sizes, dates, `file:`/`folder:`). `Find-Files` is only a
+  convenience for a pattern plus extensions: `Find-Files -Pattern '*' -Extensions pdf, docx` (leading dots are accepted).
   **Needs commit 2f78893 or newer**: before that it built `(ext:a|ext:b)` and returned nothing.
 - Always `Disconnect-Everything` in `finally`. Do not call `[Everything3SDK]` directly from your own scripts.
 
@@ -49,7 +50,14 @@ These were measured against Everything 1.5.0.1423b and 1.5.0.1424b with SDK 3.0.
 |---|---|---|
 | `ext:pdf;docx` | `ext:pdf\|docx` | `\|` is OR: this means "`ext:pdf` OR name contains `docx`" and returns false hits such as `docxlist.xml` |
 | `ext:pdf\|ext:docx` or `<ext:pdf\|ext:docx>` | `(ext:pdf\|ext:docx)` | Round brackets do **not** group: `* (ext:pdf)` returns 0 hits. Grouping is `< >` |
-| a **long** path in `"D:\Folder\"` | the 8.3 short path | Everything indexes long paths: `$env:TEMP` may be a short name (`C:\Users\NAME~1.X\...`), a search for it finds nothing. Resolve with `GetLongPathNameW` first |
+| a **long** path in `"D:\Folder\"` | the 8.3 short path | Everything indexes long paths: `$env:TEMP` may be a short name (`C:\Users\NAME~1.X\...`), a search for it finds nothing - **silently** (0 hits, no error), which looks like an empty folder. Resolve with `GetLongPathNameW` first (snippet below) |
+
+```powershell
+Add-Type -Namespace Win32 -Name PathApi -MemberDefinition '[DllImport("kernel32.dll", CharSet = CharSet.Unicode)] public static extern uint GetLongPathNameW(string shortPath, System.Text.StringBuilder longPath, uint size);'
+$sb = [System.Text.StringBuilder]::new(32768)
+[void][Win32.PathApi]::GetLongPathNameW($shortPath, $sb, [uint32]$sb.Capacity)
+$longPath = $sb.ToString()   # run Add-Type once per session
+```
 
 Short reference: `a b` AND, `a|b` OR, `!a` NOT, `< >` grouping, `"D:\Dir\"` path below the folder (trailing `\`),
 `file:` / `folder:`, `ext:zip;7z`, `size:>100mb`, `dm:last7days` (modified; `dc:` created), `parent:"D:\Dir"`
@@ -58,10 +66,12 @@ Short reference: `a b` AND, `a|b` OR, `!a` NOT, `< >` grouping, `"D:\Dir\"` path
 ## Checks before relying on a result
 
 - Index coverage: Everything only knows the drives and folders configured in Everything (usually local NTFS).
-  Network drives and UNC paths are normally missing. Count the folder itself without trailing backslash:
-  `Search-Everything -Client $c -Query '"D:\Data"' -MaxResults 0` - 0 hits means not indexed, then fall back to
-  `Get-ChildItem` and say so. With a trailing backslash an empty folder also gives 0 (measured: empty folder -> 1 without,
-  0 with `\`).
+  Network drives and UNC paths are normally missing. A quoted path is a path substring match. Without trailing backslash
+  `"D:\Data"` matches the folder **and everything below it**, with `"D:\Data\"` only the entries below (measured on a folder
+  with 8 files and 2 subfolders: 11 hits without, 10 with the backslash, 8 with `file:` added; an empty folder gives
+  1 without and 0 with the backslash). So test whether a folder is indexed with the form without backslash:
+  `Search-Everything -Client $c -Query '"D:\Data"' -MaxResults 0` - 0 hits means not indexed (or a short path), then fall back
+  to `Get-ChildItem` and say so. To list or count files use `file: "D:\Data\"`.
 - Results are the index state (USN-current, normally seconds). Confirm with `Test-Path` before deleting or moving anything.
 - Everything also lists hidden and system files; exclude the recycle bin with `!"\$RECYCLE.BIN\"` if needed.
 
