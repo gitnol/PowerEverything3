@@ -5,7 +5,7 @@
 Ein leistungsstarker und benutzerfreundlicher PowerShell-Wrapper für die [Everything Search Engine](https://www.voidtools.com/) (Version 1.5+). Dieses Modul nutzt die `Everything3_x64.dll` aus dem Everything SDK, um eine extrem schnelle Dateisuche direkt aus der PowerShell-Konsole zu ermöglichen.
 
 Getestet wurde es mit:
-- PowerShell 7.5.2 und 7.6
+- PowerShell 7.6.9 (zuvor 7.5.2)
 - Everything 1.5.0.1424b-x64 (zuvor 1.5.0.1423b)
   - Webseite: https://www.voidtools.com/everything-1.5a/
   - Changelog: https://www.voidtools.com/forum/viewtopic.php?f=12&t=9787
@@ -14,6 +14,8 @@ Getestet wurde es mit:
   - Download: https://www.voidtools.com/Everything-SDK-3.0.1.12.zip
   - Größe: (513 KB - SHA256: d35ed05f339d82b9e7add43fda82efc497ee5b09818b8fe0152fd90737b614fc)
   - GitHub: https://github.com/voidtools/everything_sdk3
+
+Release Notes und Diskussion: [voidtools-Forum](https://www.voidtools.com/forum/viewtopic.php?p=83688#p83688)
 
 ## Inhaltsverzeichnis
 
@@ -27,6 +29,7 @@ Getestet wurde es mit:
     - [Einfache Suchen mit `Find-Files`](#einfache-suchen-mit-find-files)
     - [Erweiterte Suchen mit `Search-Everything`](#erweiterte-suchen-mit-search-everything)
     - [Alle Treffer und Existenzprüfung](#alle-treffer-und-existenzprüfung)
+    - [Hinweise zur Suchsyntax](#hinweise-zur-suchsyntax)
   - [Praxisbeispiel: Archive neben ihrem entpackten Ordner](#praxisbeispiel-archive-neben-ihrem-entpackten-ordner)
   - [KI-Agenten-Skill](#ki-agenten-skill)
   - [VSCode-Besonderheiten](#vscode-besonderheiten)
@@ -48,8 +51,8 @@ Getestet wurde es mit:
 
 ## Anforderungen
 
-- **PowerShell 7.0** oder höher (das Modul nutzt PowerShell-7-Syntax wie `??`; Windows PowerShell 5.1 wird nicht unterstützt). Empfohlen wird **PowerShell 7.5** oder höher
-- **[Everything](https://www.voidtools.com/downloads/) v1.5a** oder neuer muss installiert sein und laufen
+- **PowerShell 7.0** oder höher (das Modul nutzt PowerShell-7-Syntax wie `??`; Windows PowerShell 5.1 wird nicht unterstützt). Empfohlen wird **PowerShell 7.6.6** oder neuer (Sicherheitskorrekturen; 7.4 und 7.5 verlieren am 2026-11-10 den Support)
+- **[Everything](https://www.voidtools.com/downloads/) 1.5** (getestet mit 1.5.0.1424b) muss installiert sein und **in derselben Windows-Sitzung** wie der Aufrufer laufen. Laut Changelog von 1.5.0.1424b werden IPC-Verbindungen aus anderen Sitzungen nicht angenommen (noch nicht gemessen). Die frühere Beta-Instanz `1.5a` gibt es nach dem 1.5.0.1424b-Installer nicht mehr; das Modul verbindet sich mit der Standardinstanz
 - Die **`Everything3_x64.dll`** (aus dem offiziellen [Everything SDK](https://www.voidtools.com/support/everything/sdk/)) muss sich im selben Verzeichnis wie das Modul befinden
 
 ---
@@ -159,6 +162,15 @@ Disconnect-Everything -Client $client
 
 Text-Eigenschaften (`Name`, `Path`, `Extension`, `Type`) kommen vollständig zurück. `Size` ist `$null`, wenn Everything die Größe nicht kennt (z.B. bei Ordnern).
 
+### Hinweise zur Suchsyntax
+
+Gemessen mit Everything 1.5.0.1423b und 1.5.0.1424b:
+
+- **Runde Klammern gruppieren nicht:** `* (ext:pdf)` findet nichts. Gruppiert wird mit `< >`, z.B. `<ext:pdf|ext:docx>`
+- **Mehrere Endungen:** `ext:pdf;docx`, nicht `ext:pdf|docx` (das heißt `ext:pdf` ODER „Name enthält docx“). `Find-Files -Extensions` baut die richtige Form selbst
+- **Nur lange Pfade:** Everything indiziert lange Pfade. Ein 8.3-Kurzpfad wie `C:\Users\NAME~1.X\...` (z.B. aus `$env:TEMP`) findet nichts
+- **Ordner zählen:** `"C:\Ordner"` zählt den Ordner selbst mit, `"C:\Ordner\"` nicht – ein leerer Ordner liefert ohne abschließenden Backslash 1 Treffer, mit 0
+
 ---
 
 ## Praxisbeispiel: Archive neben ihrem entpackten Ordner
@@ -221,6 +233,7 @@ Diese Maßnahmen stellen sicher, dass das Modul sowohl in der normalen PowerShel
 
 **SDK 3.0.1.12**
 - `Everything3_x64.dll` auf SDK 3.0.1.12 aktualisiert (Unterstützung mehrerer Sitzungen, besseres Warten bei ausgelasteten Pipes). Getestet gegen Everything 1.5.0.1423b und 1.5.0.1424b
+- Everything 1.5.0.1424b entfernt die alte Beta-Instanz `1.5a`: `Connect-Everything -InstanceName '1.5a'` scheitert jetzt mit 
 
 **KI-Agenten-Skill**
 - Neu: `skills/everything-search` – Skill für KI-Coding-Agenten (Modulnutzung, geprüfte Stolperfallen der Suchsyntax, Voraussetzungen)

@@ -13,6 +13,21 @@ Die Änderungshistorie **vor** I1 (SDK-Update 3.0.0.9, P/Invoke-Fixes, Beispiels
 
 ---
 
+## 2026-11-03 README (EN/DE) aktualisiert
+
+### Changed
+- „Tested with“: PowerShell 7.6.9, Everything 1.5.0.1424b, SDK 3.0.1.12; Link auf den Release-Notes-Beitrag im voidtools-Forum.
+- Anforderungen: PowerShell ≥ 7.6.6 empfohlen (Sicherheitskorrekturen, 7.4/7.5 Support-Ende 2026-11-10); Everything 1.5 in
+  derselben Windows-Sitzung (Herstellerchangelog 1.5.0.1424b, nicht gemessen), Instanz `1.5a` entfällt mit dem 1424b-Installer.
+- Neuer Abschnitt „Search Syntax Notes“/„Hinweise zur Suchsyntax“ (gemessene Stolperfallen), Changelog-Eintrag zu 1424b.
+- `docs/TODO.md`: Niedrige-Priorität-Punkt „README Tested with / PowerShell 7.6 empfehlen“ erledigt und entfernt.
+
+### Confidence / Ungeprüft
+- (a) Der Forum-Link (`p=83688`) stammt aus der Angabe des Maintainers, das Ziel wurde nicht geöffnet.
+- (b) Die Empfehlung 7.6.6 folgt den Advisory-Seiten vom Sweep (kein MSRC-Abgleich).
+
+---
+
 ## 2026-11-03 I10 (Teil) – Everything 1.5.0.1424b getestet
 
 ### Tested

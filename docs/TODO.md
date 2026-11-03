@@ -144,7 +144,6 @@ Clients derselben Sitzung an, prüft die Vertrauenswürdigkeit des Dienstes und 
 
 - [ ] `Everything3-Examples.ps1`: Import-Hinweis im Kopf auf die `.psd1` korrigieren (KNOWN_ISSUES K1); beim
       Ausführen nicht alle Beispiele (inkl. Systemweit-Suchen) sofort starten, sondern nur Funktionen definieren.
-- [ ] README: „Tested with" aktualisieren und PowerShell 7.6 (LTS) empfehlen (7.4/7.5 Support-Ende 2026-11-10).
 - [ ] Encoding der Modulquellen entscheiden: ASCII vs. UTF-8 mit BOM (`PSUseBOMForUnicodeEncodedFile`, 5 Dateien).
 - [ ] `Test-EverythingConnection`: Ausgabe über `Write-Information`/Objekt statt `Write-Host`.
 - [ ] Advocatus-Diaboli-Hook (`.claude/settings.json`, `KICKOFF.md` Phase 1 Punkt 7) nach Freigabe durch den

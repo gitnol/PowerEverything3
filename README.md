@@ -5,7 +5,7 @@
 A powerful and user-friendly PowerShell wrapper for the [Everything Search Engine](https://www.voidtools.com/) (Version 1.5+). This module utilizes the `Everything3_x64.dll` from the Everything SDK to enable extremely fast file searches directly from the PowerShell console.
 
 Tested with:
-- PowerShell 7.5.2 and 7.6
+- PowerShell 7.6.9 (previously 7.5.2)
 - Everything 1.5.0.1424b-x64 (previously 1.5.0.1423b)
   - Website: https://www.voidtools.com/everything-1.5a/
   - Changelog: https://www.voidtools.com/forum/viewtopic.php?f=12&t=9787
@@ -14,6 +14,8 @@ Tested with:
   - Download: https://www.voidtools.com/Everything-SDK-3.0.1.12.zip
   - Size: (513 KB - SHA256: d35ed05f339d82b9e7add43fda82efc497ee5b09818b8fe0152fd90737b614fc)
   - GitHub: https://github.com/voidtools/everything_sdk3
+
+Release notes and discussion: [voidtools forum](https://www.voidtools.com/forum/viewtopic.php?p=83688#p83688)
 
 ## Table of Contents
 
@@ -27,6 +29,7 @@ Tested with:
     - [Simple Searches with `Find-Files`](#simple-searches-with-find-files)
     - [Advanced Searches with `Search-Everything`](#advanced-searches-with-search-everything)
     - [All Results and Existence Check](#all-results-and-existence-check)
+    - [Search Syntax Notes](#search-syntax-notes)
   - [Practical Example: Archives Left Next to Their Extracted Folder](#practical-example-archives-left-next-to-their-extracted-folder)
   - [AI Agent Skill](#ai-agent-skill)
   - [VSCode Considerations](#vscode-considerations)
@@ -48,8 +51,8 @@ Tested with:
 
 ## Requirements
 
-- **PowerShell 7.0** or higher (the module uses PowerShell 7 syntax such as `??`; Windows PowerShell 5.1 is not supported). **PowerShell 7.5** or higher is recommended
-- **[Everything](https://www.voidtools.com/downloads/) v1.5a** or newer must be installed and running
+- **PowerShell 7.0** or higher (the module uses PowerShell 7 syntax such as `??`; Windows PowerShell 5.1 is not supported). **PowerShell 7.6.6** or newer is recommended (security fixes; 7.4 and 7.5 reach end of support on 2026-11-10)
+- **[Everything](https://www.voidtools.com/downloads/) 1.5** (tested with 1.5.0.1424b) must be installed and running **in the same Windows session** as the caller. According to the 1.5.0.1424b changelog, IPC connections from other sessions are not accepted (not measured yet). The old beta instance `1.5a` no longer exists after the 1.5.0.1424b installer; the module connects to the default instance
 - The **`Everything3_x64.dll`** (from the official [Everything SDK](https://www.voidtools.com/support/everything/sdk/)) must be located in the same directory as the module
 
 ---
@@ -159,6 +162,15 @@ Disconnect-Everything -Client $client
 
 Text properties (`Name`, `Path`, `Extension`, `Type`) are returned as full strings. `Size` is `$null` when Everything does not know it (e.g. folders).
 
+### Search Syntax Notes
+
+Measured against Everything 1.5.0.1423b and 1.5.0.1424b:
+
+- **Round brackets do not group:** `* (ext:pdf)` finds nothing. Use `< >` for grouping, e.g. `<ext:pdf|ext:docx>`
+- **Several extensions:** `ext:pdf;docx`, not `ext:pdf|docx` (that means `ext:pdf` OR "name contains docx"). `Find-Files -Extensions` builds the correct form for you
+- **Long paths only:** Everything indexes long paths. An 8.3 short path such as `C:\Users\NAME~1.X\...` (e.g. from `$env:TEMP`) finds nothing
+- **Folder count:** `"C:\Folder"` counts the folder itself, `"C:\Folder\"` does not – an empty folder gives 1 hit without and 0 with the trailing backslash
+
 ---
 
 ## Practical Example: Archives Left Next to Their Extracted Folder
@@ -221,6 +233,7 @@ These measures ensure that the module functions correctly in both the regular Po
 
 **SDK 3.0.1.12**
 - Updated `Everything3_x64.dll` to SDK 3.0.1.12 (multiple sessions support, improved waiting on busy pipes). Tested against Everything 1.5.0.1423b and 1.5.0.1424b
+- Everything 1.5.0.1424b removes the old beta instance `1.5a`: `Connect-Everything -InstanceName '1.5a'` now fails with "pipe not found", the default instance works. According to the vendor changelog, IPC connections are now only accepted from clients in the same session
 
 **AI agent skill**
 - New: `skills/everything-search` – skill for AI coding agents (usage of the module, verified search-syntax pitfalls, requirements)
