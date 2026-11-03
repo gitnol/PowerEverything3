@@ -109,9 +109,9 @@ nach NTFS-Rechten des Abfragenden gefiltert werden, ist ungeprüft.
 - Everything aktuell halten, beim Kadenz-Sweep Vendor-Stand zu CVE-2025-12683 prüfen.
 - Everything 1.5.0.1424b (2026-10-15) nimmt laut Herstellerchangelog IPC-Verbindungen nur noch von Clients derselben Sitzung
   an und prüft die Vertrauenswürdigkeit des Dienstes; das verkleinert die Angriffsfläche, bedeutet aber: Aufrufer aus
-  anderer Sitzung (geplante Aufgabe ohne Anmeldung, Remote-Sitzung) erreichen Everything nicht mehr (I10). Gemessen mit 1.5.0.1424b (2026-11-03): aus der eigenen Sitzung klappt die
+  anderer Sitzung (geplante Aufgabe ohne Anmeldung, Remote-Sitzung) erreichen Everything nicht mehr. Gemessen mit 1.5.0.1424b (2026-11-03): aus der eigenen Sitzung klappt die
   Verbindung, es gibt die Pipes `Everything IPC` und `Everything IPC Session 1`; der Zugriff aus einer anderen Sitzung ist
-  noch ungemessen (I10).
+  als SYSTEM in Sitzung 0 gemessen: Die Verbindung wird aufgebaut, die erste Suche scheitert mit 0xE0000003 (EVERYTHING3_ERROR_DISCONNECTED).
 
 **Restrisiko:** Mittel – außerhalb des Projektcodes, aber Voraussetzung für dessen Nutzung.
 

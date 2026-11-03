@@ -22,6 +22,30 @@ schon existieren; das garantiert nur `NestedModules` in der `.psd1`. Ein direkte
 
 ---
 
+## L2: Eine Hilfsfunktion namens wie ein PowerShell-Alias (`Rd`, `ls`, `cat`, `gc`) führt den Alias aus
+- Inkrement: I9
+- Scope: generisch-stack
+- Backport-Ziel: `stacks/powershell-automation/CONVENTIONS.md` §2 (PowerShell Code-Richtlinien)
+- Status: offen
+
+Aliase haben in PowerShell Vorrang vor Funktionen gleichen Namens. Eine Hilfsfunktion `Rd` (Datei lesen) rief deshalb
+`Remove-Item` auf und löschte `docs/TODO.md` (aus Git wiederhergestellt). Hilfsfunktionen nie wie Aliase benennen
+(`Get-Alias <Name>` vor dem Anlegen prüfen) und vor Skripten, die Dateien umschreiben, `git status` sauber halten.
+Nur ein Vorfall — Vorschlag, kein Beschluss.
+
+---
+
+## L3: `$env:TEMP` kann ein 8.3-Kurzname sein; Everything (und jeder Pfadvergleich) kennt nur den Langpfad
+- Inkrement: I9
+- Scope: projekt-spezifisch
+- Backport-Ziel: —
+- Status: projekt-intern
+
+Die Fixture-Suche unter `C:\Users\VORNAM~1.NAC\...` lieferte 0 Treffer, bis der Pfad per `GetLongPathNameW` aufgelöst wurde
+(`tests/Integration/FindFiles.Extensions.Integration.Tests.ps1`). Zu eng an Everything gebunden und ein einzelner Befund — kein
+Backport-Kandidat; gilt im Projekt weiter.
+
+---
 ## Pflege
 
 - Neuer „Lessons Learned"-Block im `CHANGELOG.md` → Eintrag `## L<N>:` hier anlegen.

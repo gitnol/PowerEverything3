@@ -33,7 +33,7 @@ public static extern uint GetLongPathNameW(string shortPath, System.Text.StringB
     New-Item -ItemType Directory -Path $script:Fixture | Out-Null
 
     # Treffer fuer pdf/docx: a.pdf, b.docx, e.PDF. Fallen: Endung steckt nur im NAMEN, aehnliche Endung (.doc).
-    'a.pdf', 'b.docx', 'e.PDF', 'c.txt', 'd.doc', 'report_docx_notes.txt', 'pdfinfo.txt', 'docxlist.xml' |
+    'a.pdf', 'b.docx', 'e.PDF', 'c.txt', 'd.doc', 'report_docx_notes.txt', 'pdfinfo.txt', 'docxlist.xml', 'noext' |
         ForEach-Object { Set-Content -LiteralPath (Join-Path $script:Fixture $_) -Value 'x' }
 
     $script:Scope = '"{0}\"' -f $script:Fixture
@@ -88,6 +88,13 @@ Describe 'Find-Files -Extensions' -Tag 'Integration' -Skip:(-not $script:Everyth
         $names | Should -Not -Contain 'docxlist.xml'
         $names | Should -Not -Contain 'report_docx_notes.txt'
         $names | Should -Not -Contain 'pdfinfo.txt'
+    }
+    It 'laesst die Suche bei einer Liste nur aus leeren Eintraegen unveraendert' {
+        @(Find-Files -Pattern "$script:Scope *" -Extensions '' -MaxResults 0).Count | Should -Be $script:FixtureCount
+    }
+    It 'ignoriert leere Eintraege neben echten Endungen' {
+        $r = Find-Files -Pattern "$script:Scope *" -Extensions 'pdf', '' -MaxResults 0
+        Get-FoundName $r | Should -Be (Get-Expected 'pdf')
     }
     It 'laesst die Suche ohne -Extensions unveraendert (alle Fixture-Dateien)' {
         @(Find-Files -Pattern "$script:Scope *" -MaxResults 0).Count | Should -Be $script:FixtureCount

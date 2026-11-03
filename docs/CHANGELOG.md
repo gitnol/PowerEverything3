@@ -13,6 +13,65 @@ Die Änderungshistorie **vor** I1 (SDK-Update 3.0.0.9, P/Invoke-Fixes, Beispiels
 
 ---
 
+## 2026-11-03 Reflexion nach I9/I10 (`KICKOFF.md` Phase 1c)
+
+### Selbstkritik (Advocatus Diaboli, belegt)
+- **Positiv:** Der Fix für Issue #1 ging test-first (3 von 6 Tests behavioral rot vor dem Fix, Commit 2f78893); Behauptungen im Skill
+  sind gemessen (18 Syntaxfälle, zwei Everything-Versionen); DLL-Update mit Hash-, Signatur- und Exportabgleich; der Sweep
+  hat die zu niedrige Empfehlung „PowerShell ≥ 7.6.5“ korrigiert (≥ 7.6.6, `security/DEPENDENCY_AUDIT.md`).
+- **Negativ / angreifbar:**
+  1. Mutationsprüfung der Find-Files-Änderung (Mutant im Kopierverzeichnis, 8 Tests): M1 `;`→`|` 3 rot, M4 ohne Guard 1 rot, M5 runde
+     Klammern 5 rot, Kontrolle 0 rot — aber **M2 (kein `TrimStart('.')`) und M3 (kein `Where-Object`) überleben**: Everything 1.5.0.1424b
+     akzeptiert `ext:.pdf;.docx` und `ext:pdf;` ohnehin. Beide Zeilen sind auf dieser Version äquivalent und bleiben als
+     defensive Normalisierung (ältere Builds ungeprüft); die Aussage „führende Punkte werden akzeptiert“ stimmt, das Verdienst liegt bei Everything.
+  2. Die Sitzungsmessung (K6) ist **eine** Messung, nur Sitzung 0 als SYSTEM.
+  3. Der Skill existiert zusätzlich in einer internen Fassung des Maintainers: die Syntaxfakten können auseinanderlaufen.
+  4. Mein Alias-Unfall (`Rd` → `Remove-Item`, L2) kostete `docs/TODO.md` bis zur Wiederherstellung aus Git.
+- **Backport-Filter:** L2 (Alias-Kollision) → `generisch-stack`, Status `offen`, nur ein Vorfall (Vorschlag, nicht dringend). L3 (8.3-Kurzpfad)
+  → `projekt-intern`. „Negativtests brauchen eine Positivkontrolle“ steht sinngemäß schon in `KICKOFF.md` Phase 2 — kein Backport.
+
+### Checks (Schritt 0–2)
+- Verletzung 1–4: 0 Treffer (`~~I#`, Doppelung offen/abgeschlossen, `### I#:` für Erledigtes). Health-Grep: alle Treffer betreffen
+  offene Inkremente (I2–I7), legitim. Interna-Scan (`.internal-terms`): 0 Treffer. Cross-Refs: I8 stand in `TODO.md`, aber nicht in
+  `STATE.md` „Offene Punkte“ — nachgetragen. Hotspot-Analyse nicht ausgeführt (erste Reflexion, keine Vergleichsbasis). Die
+  `validate_project_docs.sh`-Variante lief nicht (Template-Skript hier nicht geprüft), die Checks wurden von Hand ausgeführt.
+- Testgüte: Mutationsprüfung siehe oben; als Folge zwei Tests ergänzt (nur leere Einträge; leere Einträge neben echten Endungen,
+  Fixture `noext`). Danach 8 Tests; M4 wird erkannt, M2/M3 bleiben äquivalent.
+
+### Roadmap-Vorschlag (Schritt 2b, zur Entscheidung — `TODO.md` unverändert)
+1. **I2** (Harness, Manifest, PATH): übernimmt `tests/Integration/` ins Pester-Harness (Pin 5.7.1) und das Fixture-Muster samt Langpfad-Helfer.
+2. **I5** baut auf dem vorhandenen Fixture-Test auf (Langpfad-Helfer, Warten auf den Index); der Fall „Text-Property > 1023 Zeichen“ (K3) bleibt offen.
+3. **I4** (7-Zip: Mindestversion jetzt 26.05, Timeout) ist klein und unabhängig. I8 baut auf I2 auf und wird danach gebündelt.
+
+### Changed
+- `STATE.md`: Marker „Nächste Reflexion“ → I12; I8 in „Offene Punkte“ nachgetragen; I1 ins Archiv `docs/changelog/ARCHIVE-STATE.md` rotiert.
+- `LESSONS_LEARNED.md`: L2 (offen, generisch-stack), L3 (projekt-intern).
+
+### Template-Backport (nur Vorschlag, kein Template-Commit)
+- L2 für `stacks/powershell-automation/CONVENTIONS.md` §2: Hilfsfunktionen nie wie Aliase benennen. Freigabe steht aus.
+
+---
+
+## 2026-11-03 I10 – Sitzungsbindung gemessen (Everything 1.5.0.1424b)
+
+### Tested
+- Einmalige geplante Aufgabe als SYSTEM (Sitzung 0), Everything 1.5.0.1424b läuft in Sitzung 1, DLL 3.0.1.12: `Connect-Everything`
+  gelingt, `Search-Everything` scheitert mit „Suche fehlgeschlagen mit Fehler: 3758096387“ = 0xE0000003
+  (EVERYTHING3_ERROR_DISCONNECTED, `Everything3.h`). Das stützt die Aussage im Herstellerchangelog (IPC nur aus derselben Sitzung).
+  Messskript: einmalige Aufgabe mit anschließendem Aufräumen (Aufgabe und Arbeitsordner entfernt, vom Maintainer in einer Admin-Shell ausgeführt).
+
+### Changed
+- `docs/KNOWN_ISSUES.md` K6 (Verhalten und Workaround), `docs/BACKLOG.md` (verständlichere Fehlermeldungen), README (EN/DE),
+  `operations/SETUP.md`, `security/THREAT_MODEL.md` §6, `security/DEPENDENCY_AUDIT.md`, `architecture/DEPENDENCIES.md`, Skill.
+- I10 aus `TODO.md` entfernt (erledigt), in `STATE.md` als abgeschlossen eingetragen.
+
+### Confidence / Ungeprüft
+- (a) Eine Messung, nur Sitzung 0 als SYSTEM; nicht getestet: zweite interaktive Sitzung (RDP/Benutzerwechsel), anderer Benutzer in
+  derselben Sitzung, Everything als Dienst ohne GUI. Ursache der 0xE0000003 (Sitzungsprüfung) ist aus dem Changelog abgeleitet, nicht bewiesen.
+- (b) Welche Pipe (`Everything IPC` / `Everything IPC Session 1`) die DLL nutzt, bleibt ungeklärt.
+
+---
+
 ## 2026-11-03 README (EN/DE) aktualisiert
 
 ### Changed

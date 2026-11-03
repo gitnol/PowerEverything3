@@ -68,7 +68,7 @@ Credentials: nur optional für SMTP (`docs/security/AUTHENTICATION.md`).
 |-----------|----------------------|-------|
 | Windows | x64, Version, auf der Everything 1.5 läuft (README nennt keine Mindestversion) | native DLL, Named Pipe, SMB/ACL-Cmdlets |
 | PowerShell | ≥ 7.0 (Modul: `??`-Operator, Klassen); ≥ 7.2 (Beispielskript, `#Requires -Version 7.2`); ≥ 7.4 für CRC aus ZIP-Einträgen; empfohlen 7.6 (LTS, ≥ 7.6.6; aktuell 7.6.9) | Sprachfeatures, `ForEach-Object -Parallel`, `ProcessStartInfo.ArgumentList` |
-| Everything | 1.5a (README: getestet 1.5.0.1424b und 1.5.0.1423b; Sitzungsbindung ungemessen, I10) | Index + SDK3-Pipe |
+| Everything | 1.5a (README: getestet 1.5.0.1424b und 1.5.0.1423b; Sitzungsbindung gemessen: Suche aus Sitzung 0 scheitert mit 0xE0000003) | Index + SDK3-Pipe |
 | Modulordner | `Everything3_x64.dll` neben `.psd1`/`.psm1` | DLL-Pfad ist fest `$PSScriptRoot` |
 
 ---

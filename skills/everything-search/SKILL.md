@@ -13,7 +13,7 @@ Everything SDK3 (`Everything3_x64.dll`) and is read-only: it only searches, it n
 
 - Windows x64, PowerShell 7+, Everything **1.5** (not 1.4) installed and **running in the same Windows session**.
   The vendor changelog for 1.5.0.1424b lists "IPC connections only accepted from clients in the same session", so
-  a scheduled task without a logged-on session cannot reach Everything. Plan a fallback (file system scan).
+  a scheduled task without a logged-on session cannot reach Everything (measured as SYSTEM in session 0: `Connect-Everything` succeeds, the first search fails with error 0xE0000003 "disconnected"). Plan a fallback (file system scan).
 - Import the module **only through the manifest** (`.psd1`). Importing the `.psm1` directly fails with
   "Unable to find type [Everything3SDK]" (`docs/KNOWN_ISSUES.md` K1).
 

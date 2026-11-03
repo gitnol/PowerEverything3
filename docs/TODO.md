@@ -124,20 +124,6 @@ u. a. CVE-2026-14266 (XZ-Heap-Overflow, RCE); `WaitForExit()` hat keinen Timeout
 - [ ] Default von `$SmtpUseSsl` festlegen (heute `$false`, Port 25) und begründen.
 - [ ] `docs/architecture/CONFIGURATION.md`, `docs/operations/SETUP.md`, README nachziehen.
 
-### I10: Rest aus I9 – Everything 1.5.0.1424b und Sitzungsbindung
-
-Anlass: I9 (2026-11-03) hat die DLL auf SDK 3.0.1.12 gehoben und gegen Everything 1.5.0.1423b getestet. Everything
-1.5.0.1424b (2026-10-15) ist nicht installiert und damit ungetestet; laut Herstellerchangelog nimmt es IPC nur noch von
-Clients derselben Sitzung an, prüft die Vertrauenswürdigkeit des Dienstes und entfernt die Instanz `1.5a` samt Dienst.
-
-**Aufgaben:**
-
-- [x] Everything 1.5.0.1424b installiert (Maintainer), `Test-EverythingConnection` und `tests/Integration` laufen (2026-11-03: grün);
-      Ergebnis im CHANGELOG, README „Tested with" angepasst.
-- [ ] Sitzungsbindung messen: Aufruf aus einer anderen Sitzung (geplante Aufgabe ohne Anmeldung, Remote-Sitzung) — Fehlerbild
-      und Meldung des Moduls; `operations/SETUP.md` und `security/THREAT_MODEL.md` §6 mit dem Messergebnis nachziehen.
-- [x] `Connect-Everything`: Fallback auf die Instanz `1.5a` geprüft (2026-11-03): `-InstanceName 1.5a` scheitert mit EVERYTHING3_ERROR_IPC_PIPE_NOT_FOUND
-      (0xE0000002), der Standardaufruf verbindet mit der Standardinstanz; Doku angepasst.
 ---
 
 ## Niedrige Priorität

@@ -52,7 +52,7 @@ Release notes and discussion: [voidtools forum](https://www.voidtools.com/forum/
 ## Requirements
 
 - **PowerShell 7.0** or higher (the module uses PowerShell 7 syntax such as `??`; Windows PowerShell 5.1 is not supported). **PowerShell 7.6.6** or newer is recommended (security fixes; 7.4 and 7.5 reach end of support on 2026-11-10)
-- **[Everything](https://www.voidtools.com/downloads/) 1.5** (tested with 1.5.0.1424b) must be installed and running **in the same Windows session** as the caller. According to the 1.5.0.1424b changelog, IPC connections from other sessions are not accepted (not measured yet). The old beta instance `1.5a` no longer exists after the 1.5.0.1424b installer; the module connects to the default instance
+- **[Everything](https://www.voidtools.com/downloads/) 1.5** (tested with 1.5.0.1424b) must be installed and running **in the same Windows session** as the caller. According to the 1.5.0.1424b changelog, IPC connections from other sessions are not accepted (measured as SYSTEM in session 0: the connection is established, but the first search fails with error `0xE0000003`, "disconnected"). The old beta instance `1.5a` no longer exists after the 1.5.0.1424b installer; the module connects to the default instance
 - The **`Everything3_x64.dll`** (from the official [Everything SDK](https://www.voidtools.com/support/everything/sdk/)) must be located in the same directory as the module
 
 ---

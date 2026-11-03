@@ -3,9 +3,9 @@
 Zuletzt aktualisiert: 2026-11-03
 **Initialisiert mit:** docs_template v27@5ce0f84 → v27@2268889 → v28@63b85ec (2026-10-22, Delta-Update)
 **Stack / Overlays:** powershell-automation / keine
-**Letztes abgeschlossenes Inkrement:** I9 – SDK3 auf 3.0.1.12 aktualisiert + Security-Sweep (2026-11-03)
+**Letztes abgeschlossenes Inkrement:** I10 – Rest aus I9: Everything 1.5.0.1424b getestet, Sitzungsbindung gemessen (2026-11-03)
 **Nächster Schritt:** I2 – Modul-Ladepfad und Manifest härten + Pester-Harness
-**Nächste Reflexion:** zu Beginn der nächsten Session fällig — I9 (durch 3 teilbar) ist abgeschlossen, `KICKOFF.md` Phase 1c nicht durchgeführt; Marker sonst bei Abschluss von I3 (siehe `KICKOFF.md` Phase 1c → `docs/REFLECTION.md` — `docs/`-Drift prüfen + Template-Backport prüfen; danach Marker um 3 erhöhen)
+**Nächste Reflexion:** bei Abschluss von I12 (letzte Reflexion 2026-11-03 nach I9/I10) (siehe `KICKOFF.md` Phase 1c → `docs/REFLECTION.md` — `docs/`-Drift prüfen + Template-Backport prüfen; danach Marker um 3 erhöhen)
 **Nächster Security-Sweep:** 2026-11-17 (Intervall 14 Tage; letzter Sweep 2026-11-03; siehe `KICKOFF.md` Phase 1 Punkt 4a → `docs/principles/SECURITY_CURRENCY.md` — fällig, sobald heute ≥ diesem Datum; nach dem Sweep Marker = Sweep-Datum + Intervall)
 
 ---
@@ -24,8 +24,8 @@ siehe `docs/CHANGELOG.md` I1.
 
 | # | Titel | Datum | Commit |
 |---|-------|-------|--------|
-| I1 | Projektdokumentation initialisiert (docs_template-Baseline) | 2026-10-11 | 54ba850 |
 | I9 | SDK3 auf 3.0.1.12 aktualisiert + Security-Sweep | 2026-11-03 | 89d33e8 |
+| I10 | Rest aus I9: Everything 1.5.0.1424b getestet, Sitzungsbindung gemessen | 2026-11-03 | (folgt) |
 
 ---
 
@@ -39,7 +39,7 @@ siehe `docs/CHANGELOG.md` I1.
 | I5 | Integrationstests (read-only) gegen eine lokale Everything-Instanz | Mittel |
 | I6 | Beispielskript testbar machen (Funktionen vom Ablauf trennen) + Unit-Tests der reinen Funktionen | Mittel |
 | I7 | Mailversand: Transport-Entscheidung (ADR) und TLS-Default | Mittel |
-| I10 | Rest aus I9: Sitzungsbindung der IPC messen (1424b getestet, Instanz `1.5a` geprüft) | Mittel |
+| I8 | Modulvertrag an `architecture/MODULE.md` und CONVENTIONS (v28) angleichen (baut auf I2 auf) | Niedrig |
 
 ---
 
