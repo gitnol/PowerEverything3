@@ -316,8 +316,10 @@ function Find-Files {
         # Query mit Erweiterungen erstellen
         $query = $Pattern
         if ($Extensions.Count -gt 0) {
-            $extQuery = ($Extensions | ForEach-Object { "ext:$_" }) -join "|"
-            $query = "$Pattern ($extQuery)"
+            # Everything kennt runde Klammern nicht als Gruppierung ("( )" liefert 0 Treffer) und "ext:a|b" bedeutet
+            # "ext:a ODER Name enthaelt b" - die dokumentierte Liste ist "ext:a;b"; fuehrende Punkte entfernen
+            $extList = ($Extensions | ForEach-Object { $_.TrimStart('.') } | Where-Object { $_ }) -join ';'
+            if ($extList) { $query = "$Pattern ext:$extList" }
         }
         
         # Eigenschaften festlegen

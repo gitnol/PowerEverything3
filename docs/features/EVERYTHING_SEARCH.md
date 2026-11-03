@@ -44,7 +44,7 @@ ausgewählten Eigenschaften weiterverarbeiten.
 | `-CheckExists` | Switch | Nein | aus | — | `Exists` per `Test-Path` je Treffer füllen (langsam), sonst `$null` |
 | `-MatchCase`, `-MatchWholeWord`, `-MatchPath`, `-Regex` | Switch | Nein | aus | — | Suchoptionen von Everything |
 
-`Find-Files`: `-Pattern` (Pflicht), `-Extensions` (wird zu `(ext:a|ext:b)`), `-IncludeProperties` (Size, DateModified,
+`Find-Files`: `-Pattern` (Pflicht), `-Extensions` (wird zu `Pattern ext:a;b`, führende Punkte werden entfernt), `-IncludeProperties` (Size, DateModified,
 DateCreated, Attributes), `-CaseSensitive`, `-Regex`, `-MaxResults`, `-CheckExists`, `-InstanceName`.
 
 ---

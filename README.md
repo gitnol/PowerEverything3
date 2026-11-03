@@ -213,6 +213,9 @@ These measures ensure that the module functions correctly in both the regular Po
 
 ## Changelog
 
+**`Find-Files -Extensions` fix**
+- Fixed: `Find-Files -Extensions` returned nothing on Everything 1.5 because the query was built as `(ext:a|ext:b)` and Everything does not treat round brackets as grouping. It now builds `ext:a;b`, and leading dots (`.pdf`) are accepted (reported in issue #1)
+
 **Archive example: content check and index fix**
 - New: content check archive ↔ extracted folder (CSV columns `Content`/`ContentDetails`, column "Content" in mails); level 1 always, level 2 with `-CheckContentCrc`; formats other than ZIP via 7-Zip if available
 - Fixed: an empty but indexed folder was reported as "not in the Everything index" (the index check now counts the folder itself)

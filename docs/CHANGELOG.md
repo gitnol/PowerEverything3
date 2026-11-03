@@ -13,6 +13,29 @@ Die Änderungshistorie **vor** I1 (SDK-Update 3.0.0.9, P/Invoke-Fixes, Beispiels
 
 ---
 
+## 2026-11-03 Fix – `Find-Files -Extensions` (GitHub-Issue #1)
+
+### Fixed
+- `Everything3-PowerShell-Wrapper.psm1` (`Find-Files`): Die Endungs-Suche wurde als `Pattern (ext:a|ext:b)` gebaut und lieferte
+  unter Everything 1.5.0.1423b **0 Treffer** (runde Klammern gruppieren dort nicht; Gruppierung ist `< >`). Jetzt
+  `Pattern ext:a;b`, führende Punkte werden entfernt. Der Vorschlag aus dem Issue (`ext:a|b`) wurde bewusst nicht
+  übernommen: `|` bedeutet dort „`ext:a` ODER Name enthält `b`" und lieferte im Test `docxlist.xml` und
+  `report_docx_notes.txt` als Fehltreffer.
+
+### Added
+- `tests/Integration/FindFiles.Extensions.Integration.Tests.ps1` (Tag `Integration`, 6 Fälle, eigenes Fixture unter
+  `$env:TEMP`, Erwartung aus dem Dateisystem als Orakel; wird ohne laufendes Everything übersprungen). Vor dem Fix: 3 rot
+  (Assertion `Expected @('a.pdf', …), but got $null`), nach dem Fix: 6 grün.
+
+### Confidence / Ungeprüft
+- (a) Nicht getestet: Everything 1.5.0.1409a (Instanz `1.5a`, Pipe war nicht erreichbar) und alle anderen Builds; Verhalten mit
+  Pattern, die selbst `|` auf oberster Ebene enthalten, ist nur durch einen Fall belegt (kein Unterschied zu `<Pattern>`-Klammerung gemessen).
+- (b) Das Issue meldet Version „1.5a"; ob der Fehler dort identisch auftritt, ist nicht belegt.
+- (c) Pester-Harness (`tests/RequiredModules.psd1`) gibt es noch nicht (I2); der Test lief mit Pester 5.7.1 direkt.
+- Struktur-Check: `validate_project_docs.sh` nicht ausgeführt (Template-Repo nicht geprüft), Checks manuell offen.
+
+---
+
 ## 2026-10-11 I1 – Projektdokumentation initialisiert (docs_template-Baseline)
 
 ### Added

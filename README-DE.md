@@ -213,6 +213,9 @@ Diese Maßnahmen stellen sicher, dass das Modul sowohl in der normalen PowerShel
 
 ## Änderungen
 
+**`Find-Files -Extensions` korrigiert**
+- Behoben: `Find-Files -Extensions` lieferte unter Everything 1.5 keine Treffer, weil die Suche als `(ext:a|ext:b)` gebaut wurde und Everything runde Klammern nicht als Gruppierung kennt. Die Suche lautet jetzt `ext:a;b`, führende Punkte (`.pdf`) werden akzeptiert (gemeldet in Issue #1)
+
 **Archiv-Beispiel: Inhaltsprüfung und Index-Korrektur**
 - Neu: Inhaltsprüfung Archiv ↔ entpackter Ordner (CSV-Spalten `Content`/`ContentDetails`, Spalte „Content“ in den Mails); Stufe 1 immer, Stufe 2 mit `-CheckContentCrc`; andere Formate als ZIP per 7-Zip, falls vorhanden
 - Behoben: Ein leerer, aber indizierter Ordner wurde als „nicht im Everything-Index“ gemeldet (die Index-Prüfung zählt jetzt den Ordner selbst mit)
