@@ -25,7 +25,7 @@ siehe `docs/CHANGELOG.md` I1.
 | # | Titel | Datum | Commit |
 |---|-------|-------|--------|
 | I1 | Projektdokumentation initialisiert (docs_template-Baseline) | 2026-10-11 | 54ba850 |
-| I9 | SDK3 auf 3.0.1.12 aktualisiert + Security-Sweep | 2026-11-03 | (folgt) |
+| I9 | SDK3 auf 3.0.1.12 aktualisiert + Security-Sweep | 2026-11-03 | 89d33e8 |
 
 ---
 
