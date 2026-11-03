@@ -25,7 +25,7 @@ siehe `docs/CHANGELOG.md` I1.
 | # | Titel | Datum | Commit |
 |---|-------|-------|--------|
 | I9 | SDK3 auf 3.0.1.12 aktualisiert + Security-Sweep | 2026-11-03 | 89d33e8 |
-| I10 | Rest aus I9: Everything 1.5.0.1424b getestet, Sitzungsbindung gemessen | 2026-11-03 | (folgt) |
+| I10 | Rest aus I9: Everything 1.5.0.1424b getestet, Sitzungsbindung gemessen | 2026-11-03 | c77a597 |
 
 ---
 
