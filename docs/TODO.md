@@ -83,7 +83,7 @@ u. a. CVE-2026-14266 (XZ-Heap-Overflow, RCE); `WaitForExit()` hat keinen Timeout
 
 - [ ] Test (behaviorales Rot): ein hängender 7-Zip-Aufruf (Stub-Prozess) wird nach einem Timeout beendet und als
       „content check N/A (timeout)" gemeldet statt den Lauf zu blockieren.
-- [ ] 7-Zip-Version (`FileVersion` von `7z.exe`) prüfen; unter der Mindestversion (Stand Sweep 2026-10-11: 26.04)
+- [ ] 7-Zip-Version (`FileVersion` von `7z.exe`) prüfen; unter der Mindestversion (Stand Sweep 2026-11-03: 26.05)
       Nicht-ZIP-Formate als `N/A` melden und warnen.
 - [ ] Mindestversion als `$script:`-Konstante mit Quelle/Datum; `docs/architecture/DEPENDENCIES.md` verweist darauf.
 
@@ -124,22 +124,19 @@ u. a. CVE-2026-14266 (XZ-Heap-Overflow, RCE); `WaitForExit()` hat keinen Timeout
 - [ ] Default von `$SmtpUseSsl` festlegen (heute `$false`, Port 25) und begründen.
 - [ ] `docs/architecture/CONFIGURATION.md`, `docs/operations/SETUP.md`, README nachziehen.
 
-### I9: SDK3 auf 3.0.1.12 prüfen und ggf. aktualisieren
+### I10: Rest aus I9 – Everything 1.5.0.1424b und Sitzungsbindung
 
-Anlass (2026-11-03): Das Repo liefert `Everything3_x64.dll` aus SDK 3.0.0.9 (`Everything-SDK-3.0.0.9.zip`, 515026 Byte,
-Stand 2025-10-11). Auf voidtools.com liegt `Everything-SDK-3.0.1.12.zip` (524889 Byte, Last-Modified 2026-10-16 — Header
-per HEAD-Abfrage gelesen, ZIP nicht geladen). Everything 1.5.0.1424b (2026-10-15) ändert laut Changelog die IPC-Sicherheit
-(nur Clients derselben Sitzung) und prüft die Vertrauenswürdigkeit des Dienstes; der Installer entfernt die Instanz `1.5a`.
-Ob die 3.0.0.9-DLL damit weiter funktioniert, ist ungeprüft; lokal läuft 1.5.0.1423b.
+Anlass: I9 (2026-11-03) hat die DLL auf SDK 3.0.1.12 gehoben und gegen Everything 1.5.0.1423b getestet. Everything
+1.5.0.1424b (2026-10-15) ist nicht installiert und damit ungetestet; laut Herstellerchangelog nimmt es IPC nur noch von
+Clients derselben Sitzung an, prüft die Vertrauenswürdigkeit des Dienstes und entfernt die Instanz `1.5a` samt Dienst.
 
 **Aufgaben:**
 
-- [ ] ZIP in ein leeres Verzeichnis laden (Download vorher freigeben), SHA256, Authenticode und `FileVersion` der DLL prüfen.
-- [ ] `Everything3.h` der neuen Version gegen die Signaturen in `Everything3SDK.psm1` abgleichen (Änderungen seit 3.0.0.9).
-- [ ] Integrationstests (I5 bzw. `tests/Integration/`) und `Test-EverythingConnection` gegen 1.5.0.1423b **und** 1.5.0.1424b.
-- [ ] DLL, SHA256, Signaturstatus in `docs/architecture/DEPENDENCIES.md` und README („Tested with“) nachziehen;
-      Security-Sweep-Befund (`docs/security/DEPENDENCY_AUDIT.md`) datiert eintragen.
-
+- [ ] Everything 1.5.0.1424b installieren (Maintainer), `Test-EverythingConnection` und `tests/Integration` laufen lassen;
+      Ergebnis im CHANGELOG, README „Tested with" anpassen.
+- [ ] Sitzungsbindung messen: Aufruf aus einer anderen Sitzung (geplante Aufgabe ohne Anmeldung, Remote-Sitzung) — Fehlerbild
+      und Meldung des Moduls; `operations/SETUP.md` und `security/THREAT_MODEL.md` §6 mit dem Messergebnis nachziehen.
+- [ ] `Connect-Everything`: Fallback auf die Instanz `1.5a` prüfen (der 1424b-Installer entfernt sie) und Doku anpassen.
 ---
 
 ## Niedrige Priorität

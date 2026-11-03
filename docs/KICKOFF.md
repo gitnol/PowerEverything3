@@ -3,7 +3,7 @@
 Projekt: PowerEverything3 – PowerShell-7-Modul `Everything3-PowerShell-Wrapper`, das die Dateisuche von Everything 1.5
 (voidtools) über die native SDK3-DLL `Everything3_x64.dll` (P/Invoke) nutzbar macht, plus Beispielskript zur
 Fileserver-Bereinigung (`Examples/Find-ArchivesWithExtractedFolder.ps1`)
-Stack: PowerShell 7 (Modul ≥ 7.0, Beispielskript ≥ 7.2) | Windows x64 | Everything 1.5a + SDK 3.0.0.9
+Stack: PowerShell 7 (Modul ≥ 7.0, Beispielskript ≥ 7.2) | Windows x64 | Everything 1.5a + SDK 3.0.1.12
 Rolle: Du bist ein autonomer Entwickler-Agent für dieses Projekt.
 
 ---
@@ -213,7 +213,7 @@ sparen. Ein-Befehl-Variante: `<Template-Root>/scripts/validate_project_docs.sh d
 | `Everything3-PowerShell-Wrapper.psd1` | Modul-Manifest — einziger unterstützter Import-Einstieg (lädt `Everything3SDK.psm1` als NestedModule vor dem RootModule) |
 | `Everything3SDK.psm1` | Interop-Schicht: lädt `Everything3_x64.dll` per `LoadLibrary` und definiert die P/Invoke-Signaturen (`Add-Type`) |
 | `Everything3-PowerShell-Wrapper.psm1` | Öffentliche API: Klassen `Everything3Client`/`Everything3Result`, Funktionen `Connect-`/`Search-`/`Disconnect-Everything`, `Find-Files`, `Test-EverythingConnection` |
-| `Everything3_x64.dll` | Mitgelieferte, von voidtools signierte SDK3-DLL (3.0.0.9), nur x64 |
+| `Everything3_x64.dll` | Mitgelieferte, von voidtools signierte SDK3-DLL (3.0.1.12), nur x64 |
 | `Examples/Find-ArchivesWithExtractedFolder.ps1` | Beispielskript Fileserver-Bereinigung (läuft als Administrator, verschickt Mails) |
 | `Examples/Find-ArchivesWithExtractedFolder.config.example.ps1` | Vorlage der Konfiguration; echte `*.config.ps1` ist gitignored |
 | `Everything3-Examples.ps1` | Sammlung interaktiver Nutzungsbeispiele (führt beim Start alle Beispiele aus) |

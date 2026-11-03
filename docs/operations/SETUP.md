@@ -7,11 +7,11 @@
 - Windows x64
 - PowerShell ≥ 7.0 für das Modul, ≥ 7.2 für das Beispielskript (`$PSVersionTable.PSVersion` prüfen)
   - Windows PowerShell 5.1 wird **nicht** unterstützt (Syntax `??`); empfohlen: PowerShell 7.6 (LTS) in der aktuellen
-    Patch-Version (≥ 7.6.5, `docs/security/DEPENDENCY_AUDIT.md`)
+    Patch-Version (≥ 7.6.6, `docs/security/DEPENDENCY_AUDIT.md`)
 - Everything 1.5a installiert und gestartet (https://www.voidtools.com/everything-1.5a/). Hinweis zum Everything-Dienst:
   `docs/security/THREAT_MODEL.md` §6 (CVE-2025-12683)
 - `Everything3_x64.dll` liegt im Modulordner (im Repository enthalten)
-- Nur Beispielskript: Domänenmitgliedschaft, lokale Adminrechte, optional 7-Zip ≥ 26.04 (`7z.exe` **und** `7z.dll`),
+- Nur Beispielskript: Domänenmitgliedschaft, lokale Adminrechte, optional 7-Zip ≥ 26.05 (`7z.exe` **und** `7z.dll`),
   erreichbares SMTP-Relay
 - Nur Entwicklung: Pester 5.7.1, PSScriptAnalyzer (`docs/architecture/DEPENDENCIES.md`)
 

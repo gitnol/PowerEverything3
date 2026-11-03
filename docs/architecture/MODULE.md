@@ -108,7 +108,7 @@ Weitere Zustände, die das Modul beim Import nicht verändern darf, als eigene F
 ## Native Binärdateien
 
 1. **Ablage und Herkunft:** `Everything3_x64.dll` liegt im Modulordner (Root, nicht `bin/`), in `.gitattributes` als
-   `binary`. Herkunft (SDK 3.0.0.9), Signaturprüfung (voidtools PTY LTD) und SHA-256 stehen in
+   `binary`. Herkunft (SDK 3.0.1.12), Signaturprüfung (voidtools PTY LTD) und SHA-256 stehen in
    `architecture/DEPENDENCIES.md` („Externe Binaries"). Zielbild laut Template: die Prüfsumme steht nur im Modulcode,
    `DEPENDENCIES.md` nennt Herkunft, Version und Signaturergebnis — umstellen mit der Prüfsummenprüfung (I8).
 2. **Vor dem Laden prüfen:** Heute keine Prüfung (`security/THREAT_MODEL.md` §1). Zielbild: Prüfsumme bei jedem
@@ -131,7 +131,7 @@ Set-StrictMode -Version 3.0
 $ErrorActionPreference = 'Stop'
 
 $script:DllPfad   = Join-Path $PSScriptRoot 'Everything3_x64.dll'
-$script:DllSha256 = 'BE25B01C73BBF359B50DDF30255133225F93B4BC40A8D208173319373BCDAA5C'   # SDK 3.0.0.9
+$script:DllSha256 = '450FAF011103C7DCE6049FDB7C8851E26578AC5D3A404A02E759529939D6F289'   # SDK 3.0.1.12
 $ist = (Get-FileHash -LiteralPath $script:DllPfad -Algorithm SHA256).Hash
 if ($ist -ne $script:DllSha256) { throw "Pruefsumme der DLL stimmt nicht: $script:DllPfad" }
 $null = [System.Runtime.InteropServices.NativeLibrary]::Load($script:DllPfad)
@@ -140,8 +140,8 @@ if (-not ('Everything3SDK' -as [type])) {
 }
 ```
 
-Abhängigkeiten der DLL sucht Windows nur per Dateiname. Die SDK-DLL 3.0.0.9 nennt nur Windows-Systembibliotheken
-(`KERNEL32`, `USER32`, `OLEAUT32`, `ole32`, `mscoree`; geprüft 2026-10-22 per Namenssuche im Binärcode, nicht per
+Abhängigkeiten der DLL sucht Windows nur per Dateiname. Die SDK-DLL 3.0.1.12 nennt nur Windows-Systembibliotheken
+(`KERNEL32`, `USER32`, `OLEAUT32`, `ole32`, `mscoree`; geprüft 2026-11-03 per Namenssuche im Binärcode, nicht per
 Importtabelle). Bringt eine neue SDK-Version eigene DLLs mit, diese ebenso vorab laden und den Fall testen.
 
 ---

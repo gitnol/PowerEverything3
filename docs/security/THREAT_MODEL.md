@@ -57,7 +57,7 @@ XZ-Dekompression, behoben in 26.02; weitere Parser-Fixes in 26.01 und unbenannte
 oder sehr großes Archiv (Dekompressionsbombe bei `x -so`) kann den Lauf blockieren.
 
 **Mitigation:**
-- 7-Zip aktuell halten (Stand 2026-10-11: ≥ 26.04); ohne 7-Zip prüft das Skript nur ZIP.
+- 7-Zip aktuell halten (Stand 2026-11-03: ≥ 26.05); ohne 7-Zip prüft das Skript nur ZIP.
 - I4: Versionsprüfung von `7z.exe` und Timeout je 7-Zip-Aufruf.
 - Ausführungskonto mit minimalen Rechten statt Domänen-Admin (`docs/architecture/CREDENTIAL_STRATEGY.md`).
 
@@ -100,13 +100,16 @@ sichere Verbindung garantiert.
 
 **Gefahr:** Das Modul setzt eine laufende Everything-Instanz voraus. Für den Everything-Dienst (läuft als SYSTEM)
 ist CVE-2025-12683 veröffentlicht: Die Named Pipe zwischen Dienst und GUI hat eine NULL-DACL — lokale Benutzer können
-einen Denial of Service auslösen oder, mit weiteren Schwächen kombiniert, Rechte ausweiten. Betroffene Versionen und
-ein Fix-Stand sind öffentlich nicht angegeben. Zudem liefert Everything Dateinamen aus dem gesamten Index; ob Treffer
+einen Denial of Service auslösen oder, mit weiteren Schwächen kombiniert, Rechte ausweiten. Betroffen sind laut Datenbank-Spiegeln Everything-Versionen bis
+1.4.1.1029; ein Fix-Stand ist öffentlich nicht bestätigt, für 1.5.0.x nennt keine Quelle eine Aussage (Stand 2026-11-03). Zudem liefert Everything Dateinamen aus dem gesamten Index; ob Treffer
 nach NTFS-Rechten des Abfragenden gefiltert werden, ist ungeprüft.
 
 **Mitigation:**
 - Everything-Dienst nur installieren, wo nötig; auf Mehrbenutzer-Systemen (Terminalserver) besonders abwägen.
 - Everything aktuell halten, beim Kadenz-Sweep Vendor-Stand zu CVE-2025-12683 prüfen.
+- Everything 1.5.0.1424b (2026-10-15) nimmt laut Herstellerchangelog IPC-Verbindungen nur noch von Clients derselben Sitzung
+  an und prüft die Vertrauenswürdigkeit des Dienstes; das verkleinert die Angriffsfläche, bedeutet aber: Aufrufer aus
+  anderer Sitzung (geplante Aufgabe ohne Anmeldung, Remote-Sitzung) erreichen Everything nicht mehr (I10).
 
 **Restrisiko:** Mittel – außerhalb des Projektcodes, aber Voraussetzung für dessen Nutzung.
 

@@ -9,10 +9,10 @@ Getestet wurde es mit:
 - Everything 1.5.0.1423b-x64 (zuvor 1.5.0.1396a)
   - Webseite: https://www.voidtools.com/everything-1.5a/
   - Changelog: https://www.voidtools.com/forum/viewtopic.php?f=12&t=9787
-- SDK Version 3.0.0.9 (enthaltene `Everything3_x64.dll`, signiert von voidtools PTY LTD)
+- SDK Version 3.0.1.12 (enthaltene `Everything3_x64.dll`, signiert von voidtools PTY LTD)
   - Webseite: https://www.voidtools.com/forum/viewtopic.php?t=15853
-  - Download: https://www.voidtools.com/Everything-SDK-3.0.0.9.zip
-  - Größe: (503 KB - SHA256: 124685d35a5f49f3c1e9898853e166215748c893782c6a251f5dde58dacad4fa)
+  - Download: https://www.voidtools.com/Everything-SDK-3.0.1.12.zip
+  - Größe: (513 KB - SHA256: d35ed05f339d82b9e7add43fda82efc497ee5b09818b8fe0152fd90737b614fc)
   - GitHub: https://github.com/voidtools/everything_sdk3
 
 ## Inhaltsverzeichnis
@@ -218,6 +218,9 @@ Diese Maßnahmen stellen sicher, dass das Modul sowohl in der normalen PowerShel
 ---
 
 ## Änderungen
+
+**SDK 3.0.1.12**
+- `Everything3_x64.dll` auf SDK 3.0.1.12 aktualisiert (Unterstützung mehrerer Sitzungen, besseres Warten bei ausgelasteten Pipes). Getestet gegen Everything 1.5.0.1423b; 1.5.0.1424b noch nicht getestet
 
 **KI-Agenten-Skill**
 - Neu: `skills/everything-search` – Skill für KI-Coding-Agenten (Modulnutzung, geprüfte Stolperfallen der Suchsyntax, Voraussetzungen)

@@ -41,10 +41,10 @@ Get-Module -Name Pester, PSScriptAnalyzer -ListAvailable | Select-Object Name, V
 
 | Binary | Pfad | Zweck | Fehler-Verhalten |
 |--------|------|-------|-----------------|
-| `Everything3_x64.dll` (SDK 3.0.0.9, Authenticode: voidtools PTY LTD, SHA256 `BE25B01C73BBF359B50DDF30255133225F93B4BC40A8D208173319373BCDAA5C`) | Modulordner (`$PSScriptRoot`) | Everything-SDK3-C-API (P/Invoke) | Modul-Import bricht mit „Fehler beim Laden der nativen DLL: <Pfad>" ab |
-| `7z.exe` + `7z.dll` (optional, empfohlen ≥ 26.04) | `$SevenZip`, Default `%ProgramFiles%\7-Zip\7z.exe` | Beispielskript: Verzeichnis von 7z/rar/iso/tar.* lesen, `.tar.*` per `x -so` streamen | Nicht vorhanden → Inhaltsprüfung für Nicht-ZIP-Formate „content check N/A (no 7-Zip)"; Lauf geht weiter |
+| `Everything3_x64.dll` (SDK 3.0.1.12, Authenticode: voidtools PTY LTD, SHA256 `450FAF011103C7DCE6049FDB7C8851E26578AC5D3A404A02E759529939D6F289`) | Modulordner (`$PSScriptRoot`) | Everything-SDK3-C-API (P/Invoke) | Modul-Import bricht mit „Fehler beim Laden der nativen DLL: <Pfad>" ab |
+| `7z.exe` + `7z.dll` (optional, empfohlen ≥ 26.05) | `$SevenZip`, Default `%ProgramFiles%\7-Zip\7z.exe` | Beispielskript: Verzeichnis von 7z/rar/iso/tar.* lesen, `.tar.*` per `x -so` streamen | Nicht vorhanden → Inhaltsprüfung für Nicht-ZIP-Formate „content check N/A (no 7-Zip)"; Lauf geht weiter |
 
-Die SDK-DLL stammt laut README aus `Everything-SDK-3.0.0.9.zip` (SHA256 des ZIP im README). Die Lizenz der
+Die SDK-DLL stammt laut README aus `Everything-SDK-3.0.1.12.zip` (524889 Byte, SHA256 des ZIP `D35ED05F339D82B9E7ADD43FDA82EFC497EE5B09818B8FE0152FD90737B614FC` — im README in Kleinbuchstaben). Die Lizenz der
 weiterverteilten DLL ist im Repository nicht dokumentiert (offener Punkt, `docs/BACKLOG.md` → PSGallery).
 
 ---
@@ -67,8 +67,8 @@ Credentials: nur optional für SMTP (`docs/security/AUTHENTICATION.md`).
 | Ressource | Mindestversion / Pfad | Zweck |
 |-----------|----------------------|-------|
 | Windows | x64, Version, auf der Everything 1.5 läuft (README nennt keine Mindestversion) | native DLL, Named Pipe, SMB/ACL-Cmdlets |
-| PowerShell | ≥ 7.0 (Modul: `??`-Operator, Klassen); ≥ 7.2 (Beispielskript, `#Requires -Version 7.2`); ≥ 7.4 für CRC aus ZIP-Einträgen; empfohlen 7.6 (LTS, ≥ 7.6.5) | Sprachfeatures, `ForEach-Object -Parallel`, `ProcessStartInfo.ArgumentList` |
-| Everything | 1.5a (README: getestet 1.5.0.1423b) | Index + SDK3-Pipe |
+| PowerShell | ≥ 7.0 (Modul: `??`-Operator, Klassen); ≥ 7.2 (Beispielskript, `#Requires -Version 7.2`); ≥ 7.4 für CRC aus ZIP-Einträgen; empfohlen 7.6 (LTS, ≥ 7.6.6; aktuell 7.6.9) | Sprachfeatures, `ForEach-Object -Parallel`, `ProcessStartInfo.ArgumentList` |
+| Everything | 1.5a (README: getestet 1.5.0.1423b; 1.5.0.1424b ungetestet, I10) | Index + SDK3-Pipe |
 | Modulordner | `Everything3_x64.dll` neben `.psd1`/`.psm1` | DLL-Pfad ist fest `$PSScriptRoot` |
 
 ---

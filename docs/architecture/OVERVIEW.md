@@ -7,7 +7,7 @@
 | Schicht | Technologie |
 |---------|-------------|
 | Öffentliche API | PowerShell-7-Skriptmodul `Everything3-PowerShell-Wrapper` (Manifest `.psd1`, RootModule `.psm1`, PowerShell-Klassen) |
-| Interop | `Everything3SDK.psm1`: `LoadLibrary` (kernel32) + `Add-Type` mit C#-P/Invoke-Signaturen auf `Everything3_x64.dll` (SDK 3.0.0.9, nur x64) |
+| Interop | `Everything3SDK.psm1`: `LoadLibrary` (kernel32) + `Add-Type` mit C#-P/Invoke-Signaturen auf `Everything3_x64.dll` (SDK 3.0.1.12, nur x64) |
 | Suchdienst (extern) | Everything 1.5a (voidtools), lokal; Kommunikation über Named Pipe (SDK3) |
 | Beispielanwendung | `Examples/Find-ArchivesWithExtractedFolder.ps1` (PowerShell ≥ 7.2): .NET `System.IO.Compression`, optional `7z.exe`, ADSI/LDAP, SMB-Cmdlets, `Send-MailMessage` |
 | Datenbank | keine (der Everything-Index gehört Everything) |
@@ -42,7 +42,7 @@ flowchart TD
     M[Everything3-PowerShell-Wrapper.psd1] -->|NestedModules zuerst| S[Everything3SDK.psm1<br/>LoadLibrary + Add-Type P/Invoke]
     M -->|RootModule| W
     W -->|Everything3_* Aufrufe| S
-    S --> D[Everything3_x64.dll<br/>SDK 3.0.0.9]
+    S --> D[Everything3_x64.dll<br/>SDK 3.0.1.12]
     D -->|Named Pipe| E[(Everything 1.5a<br/>Index)]
     E -->|Result-List| D
     W -->|Everything3Result-Objekte| U

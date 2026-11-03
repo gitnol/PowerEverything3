@@ -42,7 +42,8 @@ finally { Disconnect-Everything -Client $client }   # always release the native 
 
 ## Search syntax - verified pitfalls
 
-These were measured against Everything 1.5.0.1423b (test: `tests/Integration/FindFiles.Extensions.Integration.Tests.ps1`).
+These were measured against Everything 1.5.0.1423b with SDK 3.0.1.12 (test:
+`tests/Integration/FindFiles.Extensions.Integration.Tests.ps1`; the short reference below was also checked case by case on 2026-11-03).
 
 | Write | Do not write | Why |
 |---|---|---|

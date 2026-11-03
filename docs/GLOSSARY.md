@@ -14,7 +14,7 @@ Commit-Messages oder in Doku verwenden.
 |---|---|---|---|
 | Everything | Dateisuchmaschine von voidtools (hier Version 1.5a), die einen eigenen Index der NTFS-Volumes hält und über eine Named Pipe abfragbar ist | gesamtes Projekt | Windows-Suche / Windows-Indexdienst |
 | Everything-Instanz | Laufende Everything-Installation, über ihren Instanznamen adressiert (Standard oder `1.5a`) | `Connect-Everything -InstanceName` | Everything-Dienst (nur der Hilfsdienst mit SYSTEM-Rechten) |
-| SDK3 | Everything SDK Version 3 (`Everything3_x64.dll`, hier 3.0.0.9) — C-API für Everything 1.5 | `Everything3SDK.psm1` | Everything SDK 2 (`Everything64.dll`, Everything 1.4) — nicht unterstützt |
+| SDK3 | Everything SDK Version 3 (`Everything3_x64.dll`, hier 3.0.1.12) — C-API für Everything 1.5 | `Everything3SDK.psm1` | Everything SDK 2 (`Everything64.dll`, Everything 1.4) — nicht unterstützt |
 | Interop-Schicht | `Everything3SDK.psm1`: DLL laden + P/Invoke-Signaturen (`[Everything3SDK]`, `[Everything3Properties]`) | `Everything3SDK.psm1` | öffentliche API |
 | Client | Verbindungs-Handle zur Everything-Instanz (`[Everything3Client]`); muss mit `Disconnect-Everything` freigegeben werden | `Connect-Everything`, `Search-Everything -Client` | Search-State |
 | Search-State | Natives Objekt mit Suchtext und Optionen (Viewport, Match-Flags, Property-Requests, Sortierung) für genau eine Suche | `Search-Everything` | Result-List |

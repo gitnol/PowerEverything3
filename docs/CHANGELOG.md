@@ -13,6 +13,46 @@ Die Änderungshistorie **vor** I1 (SDK-Update 3.0.0.9, P/Invoke-Fixes, Beispiels
 
 ---
 
+## 2026-11-03 I9 – SDK3 auf 3.0.1.12 aktualisiert + Security-Sweep
+
+### Changed
+- `Everything3_x64.dll`: SDK 3.0.0.9 → **3.0.1.12** (SDK-Changelog: Unterstützung mehrerer Sitzungen, besseres Warten auf
+  ausgelastete Pipes). Quelle `https://www.voidtools.com/Everything-SDK-3.0.1.12.zip` (524889 Byte, SHA256 in
+  `architecture/DEPENDENCIES.md`), geladen nach Freigabe in ein leeres Verzeichnis. Dateiversion 3.0.1.12, Authenticode `Valid`
+  (voidtools PTY LTD), alle 26 vom Interop genutzten Funktionen stehen in der Exportliste, die Bibliotheksnamen im Binary sind
+  unverändert. `Everything3SDK.psm1` blieb unverändert.
+- Doku auf 3.0.1.12 gezogen (README EN/DE, DEPENDENCIES, MODULE, OVERVIEW, GLOSSARY, KICKOFF); Mindestversionen angehoben:
+  PowerShell ≥ 7.6.6, 7-Zip ≥ 26.05.
+
+### Security
+- Sweep 2026-11-03 (Befunde in `security/DEPENDENCY_AUDIT.md`): PowerShell-Advisories CVE-2026-40400/-62801 (fixed ab 7.6.6;
+  die Empfehlung ≥ 7.6.5 vom 2026-10-11 war zu niedrig — korrigiert), 7-Zip 26.05, Everything 1.5.0.1424b
+  (Sitzungsbindung der IPC, Dienstprüfung), CVE-2025-12683 (laut Spiegeln bis 1.4.1.1029, kein Fix bestätigt).
+  Marker auf 2026-11-17 gesetzt. Beim Sweep nicht abgedeckt: Pester und PSScriptAnalyzer (nur Entwicklung).
+
+### Tested
+- 6 Integrationstests (`tests/Integration`) und `Test-EverythingConnection` mit der neuen DLL gegen Everything 1.5.0.1423b grün.
+- Skill-Syntaxfakten gemessen (18 Fälle, alle wie behauptet): `wfn:`, `*.log`, `file:`/`folder:`, `size:`, `ext:` (auch
+  `.tar.gz` → `gz`), `!`, `regex:`, `dm:2020`, `empty:`, `case:`, `parent:`, `nopath:`, `dupe:size`, `<a|b>`.
+
+### Confidence / Ungeprüft
+- (a) Nicht getestet: Everything 1.5.0.1424b (nicht installiert) und damit die Sitzungsbindung; Ablauf aus einer anderen
+  Sitzung; Verhalten bei mehreren Sitzungen (neues SDK-Feature) — alles in I10. Der Skill wurde nicht in einer Agentensitzung
+  ausprobiert.
+- (b) Ungeprüft übernommen: Beschreibung der PowerShell-Advisories nur aus den Advisory-Seiten (nicht gegen MSRC gegengeprüft);
+  Spiegel-Angaben zu CVE-2025-12683. Der Abgleich der DLL-Signaturen beruht auf der Exportliste (`.def`), nicht auf einem
+  Vergleich der Header-Typen.
+- (c) Nicht gelesen: `Everything3.h` der neuen Version wurde nicht Zeile für Zeile mit den P/Invoke-Signaturen verglichen.
+- Reflexions-Check (`KICKOFF.md` Phase 1c) durch I9 ausgelöst, nicht durchgeführt. Struktur-Check `validate_project_docs.sh`
+  nicht ausgeführt.
+
+### Lessons Learned
+- In PowerShell hat der Alias `rd` Vorrang vor einer gleichnamigen Funktion: Eine Hilfsfunktion `Rd` löschte statt zu lesen
+  `docs/TODO.md` (aus Git wiederhergestellt, Änderung danach neu angewendet). Hilfsfunktionen nie wie Aliase
+  (`rd`, `ls`, `cat`, `gc` …) benennen.
+
+---
+
 ## 2026-11-03 Öffentlicher Skill `everything-search` (ohne I#, auf Wunsch des Maintainers; Roadmap unverändert)
 
 ### Added
