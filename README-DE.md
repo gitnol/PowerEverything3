@@ -6,7 +6,7 @@ Ein leistungsstarker und benutzerfreundlicher PowerShell-Wrapper für die [Every
 
 Getestet wurde es mit:
 - PowerShell 7.5.2 und 7.6
-- Everything 1.5.0.1423b-x64 (zuvor 1.5.0.1396a)
+- Everything 1.5.0.1424b-x64 (zuvor 1.5.0.1423b)
   - Webseite: https://www.voidtools.com/everything-1.5a/
   - Changelog: https://www.voidtools.com/forum/viewtopic.php?f=12&t=9787
 - SDK Version 3.0.1.12 (enthaltene `Everything3_x64.dll`, signiert von voidtools PTY LTD)
@@ -220,7 +220,7 @@ Diese Maßnahmen stellen sicher, dass das Modul sowohl in der normalen PowerShel
 ## Änderungen
 
 **SDK 3.0.1.12**
-- `Everything3_x64.dll` auf SDK 3.0.1.12 aktualisiert (Unterstützung mehrerer Sitzungen, besseres Warten bei ausgelasteten Pipes). Getestet gegen Everything 1.5.0.1423b; 1.5.0.1424b noch nicht getestet
+- `Everything3_x64.dll` auf SDK 3.0.1.12 aktualisiert (Unterstützung mehrerer Sitzungen, besseres Warten bei ausgelasteten Pipes). Getestet gegen Everything 1.5.0.1423b und 1.5.0.1424b
 
 **KI-Agenten-Skill**
 - Neu: `skills/everything-search` – Skill für KI-Coding-Agenten (Modulnutzung, geprüfte Stolperfallen der Suchsyntax, Voraussetzungen)

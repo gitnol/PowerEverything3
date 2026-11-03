@@ -6,7 +6,7 @@ A powerful and user-friendly PowerShell wrapper for the [Everything Search Engin
 
 Tested with:
 - PowerShell 7.5.2 and 7.6
-- Everything 1.5.0.1423b-x64 (previously 1.5.0.1396a)
+- Everything 1.5.0.1424b-x64 (previously 1.5.0.1423b)
   - Website: https://www.voidtools.com/everything-1.5a/
   - Changelog: https://www.voidtools.com/forum/viewtopic.php?f=12&t=9787
 - SDK Version 3.0.1.12 (included `Everything3_x64.dll`, signed by voidtools PTY LTD)
@@ -220,7 +220,7 @@ These measures ensure that the module functions correctly in both the regular Po
 ## Changelog
 
 **SDK 3.0.1.12**
-- Updated `Everything3_x64.dll` to SDK 3.0.1.12 (multiple sessions support, improved waiting on busy pipes). Tested against Everything 1.5.0.1423b; 1.5.0.1424b is not tested yet
+- Updated `Everything3_x64.dll` to SDK 3.0.1.12 (multiple sessions support, improved waiting on busy pipes). Tested against Everything 1.5.0.1423b and 1.5.0.1424b
 
 **AI agent skill**
 - New: `skills/everything-search` – skill for AI coding agents (usage of the module, verified search-syntax pitfalls, requirements)

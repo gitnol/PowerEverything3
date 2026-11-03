@@ -53,7 +53,7 @@ weiterverteilten DLL ist im Repository nicht dokumentiert (offener Punkt, `docs/
 
 | Service | URL / Endpunkt | Zweck | Fallback bei Ausfall |
 |---------|---------------|-------|---------------------|
-| Everything 1.5a (lokale Instanz, Prozess oder Dienst) | Named Pipe der Instanz (Standard oder `1.5a`), nur lokal | Suche im Index | Modul: `throw` nach Fallback auf Instanz `1.5a`. Beispielskript: `-SearchMode Auto` → Dateisystem-Scan, `Everything` → Abbruch |
+| Everything 1.5a (lokale Instanz, Prozess oder Dienst) | Named Pipe der Instanz (Standard; `1.5a` nur bei älteren Alpha-Installationen — 1.5.0.1424b entfernt sie), nur lokal | Suche im Index | Modul: `throw` nach Fallback auf Instanz `1.5a`. Beispielskript: `-SearchMode Auto` → Dateisystem-Scan, `Everything` → Abbruch |
 | Active Directory | `LDAP://<SID=…>` über den Domänencontroller der eigenen Domäne (implizit) | Beispielskript: Besitzer-Konto, Mail-Adresse, Kontostatus | Unbekannte SID → Name per `SecurityIdentifier.Translate`, Status `Unknown` → Sammelmail |
 | SMTP-Relay | `$SmtpServer:$SmtpPort` (Default `smtp.example.com:25`, ohne TLS) | Beispielskript: Mails an Besitzer / Debug / Sammelmail | Warnung je fehlgeschlagener Mail, Zähler „failed" |
 | DNS | `[System.Net.Dns]::GetHostEntry('')` | Beispielskript: FQDN für UNC-Pfade | Fallback `$env:COMPUTERNAME` |
@@ -68,7 +68,7 @@ Credentials: nur optional für SMTP (`docs/security/AUTHENTICATION.md`).
 |-----------|----------------------|-------|
 | Windows | x64, Version, auf der Everything 1.5 läuft (README nennt keine Mindestversion) | native DLL, Named Pipe, SMB/ACL-Cmdlets |
 | PowerShell | ≥ 7.0 (Modul: `??`-Operator, Klassen); ≥ 7.2 (Beispielskript, `#Requires -Version 7.2`); ≥ 7.4 für CRC aus ZIP-Einträgen; empfohlen 7.6 (LTS, ≥ 7.6.6; aktuell 7.6.9) | Sprachfeatures, `ForEach-Object -Parallel`, `ProcessStartInfo.ArgumentList` |
-| Everything | 1.5a (README: getestet 1.5.0.1423b; 1.5.0.1424b ungetestet, I10) | Index + SDK3-Pipe |
+| Everything | 1.5a (README: getestet 1.5.0.1424b und 1.5.0.1423b; Sitzungsbindung ungemessen, I10) | Index + SDK3-Pipe |
 | Modulordner | `Everything3_x64.dll` neben `.psd1`/`.psm1` | DLL-Pfad ist fest `$PSScriptRoot` |
 
 ---

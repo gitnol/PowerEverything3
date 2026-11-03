@@ -13,6 +13,27 @@ Die Änderungshistorie **vor** I1 (SDK-Update 3.0.0.9, P/Invoke-Fixes, Beispiels
 
 ---
 
+## 2026-11-03 I10 (Teil) – Everything 1.5.0.1424b getestet
+
+### Tested
+- Everything 1.5.0.1424b (Maintainer hat installiert), SDK-DLL 3.0.1.12, PowerShell 7.6.9: `Test-EverythingConnection` ✓,
+  `Connect-Everything` (Standardinstanz) ✓, 6 Integrationstests grün, die 18 Syntaxfälle des Skills und die Klammer-/`;`-/`|`-Messung
+  (Issue #1) liefern dieselben Ergebnisse wie auf 1.5.0.1423b.
+- Instanz `1.5a`: `Connect-Everything -InstanceName '1.5a'` scheitert mit `0xE0000002` (EVERYTHING3_ERROR_IPC_PIPE_NOT_FOUND),
+  der 1424b-Installer hat sie entfernt; der Standardaufruf verbindet mit der Standardinstanz (Fallback auf `1.5a` nur im Fehlerfall).
+- Neu sichtbar: neben `\\.\pipe\Everything IPC` existiert `Everything IPC Session 1`.
+
+### Changed
+- README (EN/DE) „Tested with“ auf 1.5.0.1424b, `architecture/DEPENDENCIES.md`, `security/THREAT_MODEL.md` §6,
+  `security/DEPENDENCY_AUDIT.md`; Skill-Hinweis auf beide gemessene Versionen.
+
+### Confidence / Ungeprüft
+- (a) Nicht getestet: Zugriff aus einer anderen Sitzung (z. B. geplante Aufgabe als SYSTEM, Remote-Sitzung) — braucht
+  Adminrechte zum Anlegen einer einmaligen Aufgabe; I10 bleibt dafür offen. Ebenso das neue SDK-Feature „mehrere Sitzungen“.
+- (b) Nicht geklärt: Welche der beiden Pipes (`Everything IPC` / `Everything IPC Session 1`) die DLL für die eigene Sitzung nutzt.
+
+---
+
 ## 2026-11-03 I9 – SDK3 auf 3.0.1.12 aktualisiert + Security-Sweep
 
 ### Changed

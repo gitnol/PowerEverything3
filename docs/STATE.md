@@ -39,7 +39,7 @@ siehe `docs/CHANGELOG.md` I1.
 | I5 | Integrationstests (read-only) gegen eine lokale Everything-Instanz | Mittel |
 | I6 | Beispielskript testbar machen (Funktionen vom Ablauf trennen) + Unit-Tests der reinen Funktionen | Mittel |
 | I7 | Mailversand: Transport-Entscheidung (ADR) und TLS-Default | Mittel |
-| I10 | Rest aus I9: Everything 1.5.0.1424b testen, Sitzungsbindung messen, Instanz `1.5a` prüfen | Mittel |
+| I10 | Rest aus I9: Sitzungsbindung der IPC messen (1424b getestet, Instanz `1.5a` geprüft) | Mittel |
 
 ---
 

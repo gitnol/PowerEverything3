@@ -132,11 +132,12 @@ Clients derselben Sitzung an, prüft die Vertrauenswürdigkeit des Dienstes und 
 
 **Aufgaben:**
 
-- [ ] Everything 1.5.0.1424b installieren (Maintainer), `Test-EverythingConnection` und `tests/Integration` laufen lassen;
-      Ergebnis im CHANGELOG, README „Tested with" anpassen.
+- [x] Everything 1.5.0.1424b installiert (Maintainer), `Test-EverythingConnection` und `tests/Integration` laufen (2026-11-03: grün);
+      Ergebnis im CHANGELOG, README „Tested with" angepasst.
 - [ ] Sitzungsbindung messen: Aufruf aus einer anderen Sitzung (geplante Aufgabe ohne Anmeldung, Remote-Sitzung) — Fehlerbild
       und Meldung des Moduls; `operations/SETUP.md` und `security/THREAT_MODEL.md` §6 mit dem Messergebnis nachziehen.
-- [ ] `Connect-Everything`: Fallback auf die Instanz `1.5a` prüfen (der 1424b-Installer entfernt sie) und Doku anpassen.
+- [x] `Connect-Everything`: Fallback auf die Instanz `1.5a` geprüft (2026-11-03): `-InstanceName 1.5a` scheitert mit EVERYTHING3_ERROR_IPC_PIPE_NOT_FOUND
+      (0xE0000002), der Standardaufruf verbindet mit der Standardinstanz; Doku angepasst.
 ---
 
 ## Niedrige Priorität
